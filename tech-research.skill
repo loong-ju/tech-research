@@ -1,0 +1,382 @@
+---
+name: "tech-research"
+description: "Use this skill when researching, analyzing, or summarizing any technology topic. Triggers include: analyzing a technology's architecture, comparing tech solutions, summarizing technical documents (PDF, PPT, DOCX), researching open-source projects, reviewing technical papers, investigating a framework or service's capabilities, or any request involving deep technical analysis. Also triggers when the user provides a PDF/PPT/DOCX file and asks for technical summary or analysis."
+---
+
+# Tech Research Skill
+
+## Research Workflow
+
+### Phase 1: 准备 (Preparation)
+1. **Extract** — 如果用户提供 PDF/PPT/DOCX，先用 `python3.12 -m markitdown <file>` 提取文本
+2. **Scope** — 从用户输入或材料中提取关键技术名称、概念和研究范围
+3. **Classify** — 判断研究类型（见下方"研究模式"），选择对应的输出模板
+
+### Phase 2: 广度搜索 (Breadth Search)
+4. **并行搜索** — 同时发起 3-6 个搜索查询，覆盖不同维度：
+   - 官方文档和规范
+   - GitHub 仓库和技术博客
+   - 行业分析和新闻报道
+   - 竞品对比和用户评价
+5. **全页面抓取** — 对高价值页面使用 `webFetch` 获取完整内容（官方文档、技术规范、架构说明）
+
+### Phase 3: 深度研究 (Depth Research)
+6. **迭代深化** — 基于广度搜索结果，对关键主题进行 2-3 轮深入搜索
+7. **交叉验证** — 关键事实至少 2 个来源交叉确认
+8. **技术细节补充** — 搜索 API 规范、JSON Schema、协议头、配置示例等技术细节
+
+### Phase 4: 综合输出 (Synthesis)
+9. **结构化组织** — 按输出模板组织内容
+10. **可视化** — 为所有流程、架构、时间线、关系添加 mermaid 图（目标：每份报告 8-25 个图）
+11. **代码示例** — 包含 JSON 配置、API 请求、HTTP 头等实际代码示例
+
+## 研究模式 (Research Modes)
+
+### 模式 A：单技术深度研究
+适用于研究单个技术/协议/框架。使用"标准输出结构"。
+- 示例：研究 Google UCP 协议、研究 Kubernetes Operator 模式
+
+### 模式 B：多技术对比研究
+适用于研究一个领域内的多个技术方案。在标准结构基础上增加：
+- **跨技术分析框架**：提炼核心问题维度（如 3A 问题），用对比表展示各方案的解决思路
+- **协议/技术关系图**：用 mermaid 展示技术间的依赖、竞争、互补关系
+- **协议技术规范详解**：每个技术单独一个子章节，包含架构图、核心流程、代码示例
+- 示例：Agentic Payment 协议对比研究
+
+### 模式 C：系列研究
+适用于一个大主题下的多个子主题分别深入研究。
+- **文件组织**：主目录下创建编号子文件夹，每个子主题一个报告
+  ```
+  {topic}/
+  ├── {topic}_research.md          # 总览报告
+  ├── 1.{subtopic_1}/
+  │   └── {subtopic_1}_research.md # 子主题报告
+  ├── 2.{subtopic_2}/
+  │   └── {subtopic_2}_research.md
+  └── N.materials/                 # 用户提供的原始材料
+      └── *.pdf / *.docx / *.pptx
+  ```
+- **总览报告**引用子报告，子报告可独立阅读
+- 示例：Agentic Payment 系列（总览 + Google UCP + Google AP2 + OpenAI ACP + Coinbase x402）
+
+### 模式 D：文档摘要分析
+适用于用户提供文档要求总结分析。
+- 先提取文本，再按标准结构组织关键信息
+- 补充 web 搜索获取上下文和最新进展
+
+## Research Sources (Priority Order)
+
+1. 用户提供材料 (PDF, PPT, DOCX)
+2. 官方文档站点和技术规范
+3. GitHub 仓库 (README, 架构文档, Release Notes, Schema 文件)
+4. 学术论文和技术博客
+5. 行业分析报告和新闻
+6. Web 搜索获取最新信息
+
+## 标准输出结构 (Standard Output Structure)
+
+包含所有适用章节；跳过无相关信息的章节。
+
+
+### 1. 概述 (Overview)
+- 一段话总结该技术的定义和核心价值
+- 关键差异化特征（3-5 个要点）
+- 如果涉及多个技术/协议，列出全景图并说明相互关系
+- 如果存在跨技术的核心分析框架（如 3A 问题），在此定义并用对比表展示各方案的解决思路：
+
+| 核心问题 | 方案 A | 方案 B | 方案 C |
+|---------|--------|--------|--------|
+| 问题 1 | 解决方式 | 解决方式 | 解决方式 |
+| 问题 2 | 解决方式 | 解决方式 | 解决方式 |
+
+### 2. 问题定义与背景 (Problem Definition & Context)
+
+> 这是研究报告中最重要的起点章节之一。任何技术方案的存在都是为了解决特定问题，必须先讲清楚问题本身，再讨论解决方案。
+
+#### 2.1 问题是什么 (What is the Problem?)
+- 用 1-3 段话清晰定义该技术要解决的核心问题
+- 问题的具体表现形式（用户痛点、系统瓶颈、行业缺陷等）
+- 问题的影响范围和严重程度（定量数据优先：影响多少用户、造成多少损失、效率降低多少）
+- 如果问题有多个层面，用结构化方式分解：
+
+```
+核心问题
+├── 子问题 1：具体描述
+├── 子问题 2：具体描述
+└── 子问题 3：具体描述
+```
+
+#### 2.2 问题的来源与成因 (Root Causes & Origins)
+- 问题是如何产生的？历史背景和技术演进中的哪些变化导致了这个问题？
+- 是技术债务、架构局限、行业变革、还是新需求涌现？
+- 用 mermaid 因果图或时间线展示问题的演化过程：
+
+```mermaid
+graph LR
+    A[背景变化/技术演进] --> B[导致的矛盾]
+    B --> C[具体问题表现]
+    C --> D[影响与后果]
+```
+
+#### 2.3 问题的现状 (Current State of the Problem)
+- 在该技术出现之前，行业/社区是如何应对这个问题的？（现有的 workaround、替代方案）
+- 现有方案的局限性是什么？为什么不够好？
+- 当前问题的紧迫程度：是否有加速恶化的趋势？
+- 关键数据点：市场规模、受影响的用户/企业数量、行业预测等
+
+#### 2.4 为什么是现在？(Why Now?)
+- 该技术/方案为什么在此时出现？而不是更早或更晚？
+- 哪些条件在近期成熟了？（技术基础设施就绪、市场需求爆发、监管变化、竞争压力等）
+- 触发事件或催化剂是什么？
+
+### 3. 核心概念与术语 (Key Concepts & Glossary)
+- 格式：`**Term** (原文) — 中文解释`
+- 聚焦理解该技术必须掌握的术语，5-20 个
+- 避免显而易见的术语
+- 多技术研究时，按技术分组或标注所属协议
+
+### 4. 发展历程 (History & Evolution)
+- 使用 mermaid timeline 图展示关键里程碑
+- 补充"关键里程碑"表格（时间 | 事件 | 意义）
+
+```mermaid
+timeline
+    title Technology Evolution
+    2024 : v1.0 Initial Release
+    2025 : v2.0 Major Update
+    2026 : v3.0 Current
+```
+
+### 5. 业务场景 (Use Cases)
+- 按角色或场景类型分组（如：消费者场景、商户场景、开发者场景）
+- 每个场景用粗体标题 + 1-2 句具体描述
+- 避免泛泛而谈，给出具体的用户故事
+
+
+### 6. 解决方案概述 (Solution Approach)
+
+> 在深入技术细节之前，先从高层次说明该技术采用了什么思路和方法来解决前述问题。这是连接"问题"和"技术实现"的桥梁章节。
+
+#### 6.1 解决思路 (Solution Philosophy)
+- 该技术采用了什么核心思路/范式来解决问题？（如：标准化、抽象层、去中心化、协议化、分层解耦等）
+- 为什么选择这种思路而非其他？（设计决策的 trade-off 分析）
+- 用一句话概括解决方案的核心洞察（如 "UCP 通过定义标准化的机器可读商务能力接口，将 N×N 集成问题简化为 1×N"）
+
+#### 6.2 方案如何解决问题 (How the Solution Addresses the Problem)
+- 逐一对应"问题定义"章节中的每个子问题，说明方案如何解决
+- 使用对照表清晰展示问题→解决方式的映射：
+
+| 问题 | 解决方式 | 关键机制 |
+|------|---------|---------|
+| 子问题 1 | 方案的具体应对 | 涉及的核心技术/协议/组件 |
+| 子问题 2 | 方案的具体应对 | 涉及的核心技术/协议/组件 |
+| 子问题 3 | 方案的具体应对 | 涉及的核心技术/协议/组件 |
+
+#### 6.3 方案的边界与局限 (Scope & Limitations)
+- 方案解决了什么，没有解决什么（明确边界）
+- 已知的局限性和约束条件
+- 需要与其他技术/方案配合才能完整解决的部分
+
+### 7. 技术架构 (Architecture)
+- 核心组件及其关系，使用 mermaid 架构图
+- 分层架构说明（如有）
+- 关键数据流和交互模式
+- 多技术研究时，展示技术间的协议栈关系：
+
+```mermaid
+graph TD
+    A[上层协议] --> B[中间层]
+    B --> C[基础层]
+    B --> D[基础层]
+```
+
+### 8. 技术实现方案与路径 (Implementation Design & Path)
+
+> 深入到具体的技术实现层面，包括协议设计、API 规范、数据模型、安全机制等。
+
+#### 8.1 协议/规范设计 (Protocol / Specification Design)
+- 协议的整体结构和分层
+- 核心数据模型和 Schema（JSON Schema、OpenAPI、Protobuf 等）
+- 关键 API 端点和交互模式
+- 状态机设计（如有）：
+
+```mermaid
+stateDiagram-v2
+    [*] --> State1
+    State1 --> State2: trigger
+    State2 --> State3: trigger
+    State3 --> [*]
+```
+
+#### 8.2 核心流程 (Core Workflows)
+- 主要工作流的完整时序图（使用 mermaid sequenceDiagram）
+- 每个流程包含：参与方、消息交换、关键决策点、异常处理
+- 包含实际的代码示例（JSON 配置、API 请求/响应、HTTP 头等）
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Agent
+    participant Service
+    User->>Agent: Request
+    Agent->>Service: API Call
+    Service-->>Agent: Response
+    Agent-->>User: Result
+```
+
+#### 8.3 安全机制 (Security Mechanisms)
+- 认证与授权方案（OAuth、JWT、mTLS、API Key 等）
+- 数据加密和传输安全
+- 信任模型和信任链
+- 攻击面分析和防护措施
+
+#### 8.4 集成路径 (Integration Path)
+- 开发者接入的具体步骤（从零到上线）
+- 前置条件和依赖
+- 典型的集成架构图
+- 代码示例和配置模板
+
+### 9. 协议/技术规范详解 (Technical Deep Dive)
+> 仅在模式 B（多技术对比）或技术规范密集的研究中使用
+
+- 每个技术/协议单独一个子章节（### 9.1, 9.2, ...）
+- 每个子章节包含：
+  - 架构图（mermaid）
+  - 核心流程（sequence diagram）
+  - 关键 API/接口定义
+  - JSON Schema / 配置示例 / HTTP 头示例
+  - 安全机制说明
+  - **该方案如何解决核心问题**（回扣到第 2 章的问题定义）
+
+
+### 10. 类似方案与竞品分析 (Alternative Solutions & Comparison)
+
+> 任何技术都不是孤立存在的。必须分析同一问题域中的其他解决方案，帮助读者理解技术选型的全貌。
+
+#### 10.1 方案全景图 (Solution Landscape)
+- 用 mermaid 图展示同一问题域中所有相关方案的定位和关系
+- 按维度分类：直接竞品、互补方案、上下游依赖、替代路径
+
+```mermaid
+graph TD
+    subgraph 直接竞品
+        A[方案 A]
+        B[方案 B]
+    end
+    subgraph 互补方案
+        C[方案 C]
+    end
+    subgraph 替代路径
+        D[方案 D]
+    end
+    A -.竞争.-> B
+    A -->|集成| C
+    D -.替代.-> A
+```
+
+#### 10.2 方案对比矩阵 (Comparison Matrix)
+- 多维度对比表（支持 5+ 技术对比）：
+
+| 维度 | 方案 A | 方案 B | 方案 C | 方案 D | 方案 E |
+|------|--------|--------|--------|--------|--------|
+| 核心定位 | ... | ... | ... | ... | ... |
+| 解决的核心问题 | ... | ... | ... | ... | ... |
+| 技术架构 | ... | ... | ... | ... | ... |
+| 实现复杂度 | ... | ... | ... | ... | ... |
+| 生态成熟度 | ... | ... | ... | ... | ... |
+| 适用场景 | ... | ... | ... | ... | ... |
+| 优势 | ... | ... | ... | ... | ... |
+| 劣势 | ... | ... | ... | ... | ... |
+
+#### 10.3 方案选型指南 (Selection Guide)
+- 不同场景下应该选择哪个方案？
+- 决策树或流程图帮助读者做选型：
+
+```mermaid
+flowchart TD
+    Q1{你的核心需求是什么？}
+    Q1 -->|需求 A| S1[推荐方案 A]
+    Q1 -->|需求 B| Q2{是否需要 X 能力？}
+    Q2 -->|是| S2[推荐方案 B]
+    Q2 -->|否| S3[推荐方案 C]
+```
+
+#### 10.4 关键差异分析 (Key Differentiators)
+- 提炼各方案之间最本质的差异（不是罗列功能，而是分析设计哲学和 trade-off）
+- 每个差异点用 1-2 段话深入分析，而非简单列表
+- 示例："ACP 选择借助 Stripe 现有基础设施快速落地，trade-off 是授权模型相对简单；AP2 选择从零设计完整的审计链，trade-off 是基础设施建设成本更高"
+
+### 11. 生态与社区 (Ecosystem & Community)
+- 合作伙伴/支持者全景（按角色分类：联合开发方、背书方、早期部署方）
+- GitHub stats（如适用）：stars, forks, contributors, last commit
+- 社区渠道和活跃度
+- 成熟度评估：早期 / 成长期 / 成熟 / 衰退
+
+### 12. 优劣势总结 (Pros & Cons)
+- 优势和劣势各列 5-8 条
+- 每条优劣势附简短说明（不是单词，而是一句话解释为什么）
+
+### 13. 快速上手 (Getting Started)
+- 最小化上手步骤（开发者视角）
+- 包含安装命令和 hello-world 示例
+- 开发者资源表（文档链接、SDK、Playground 等）
+- 如适用，包含路线图/未来规划
+
+### 14. 来源 (Sources)
+- 所有来源附内联链接：`[description](url)`
+- 分类：官方文档 / GitHub / 论文 / 行业分析 / 用户提供材料
+- 标注访问日期（如信息时效性重要）
+
+## 增量研究 (Incremental Research)
+
+用户可能在初始报告完成后要求扩展或深化特定章节。处理方式：
+
+1. **章节扩展**：用户指出某章节不够深入 → 针对该章节进行深度搜索，原地扩展内容
+2. **新章节插入**：用户要求增加新的分析维度 → 在合适位置插入新章节，重新编号
+3. **跨技术分析**：用户要求对比分析 → 提炼分析框架，创建对比表
+4. **子报告创建**：用户要求深入某个子主题 → 在子文件夹中创建独立报告
+
+## Mermaid 图表规范
+
+- 为所有流程、架构、序列、时间线、状态机使用 mermaid 语法
+- 支持类型：`graph`, `sequenceDiagram`, `flowchart`, `timeline`, `classDiagram`, `stateDiagram-v2`
+- 每个图最多 15 个节点；超过则拆分为多个图
+- 输出语言为中文时使用中文标签
+- 目标密度：每份报告 8-25 个 mermaid 图
+- 复杂流程优先使用 sequenceDiagram（展示多方交互）
+- 架构概览优先使用 graph TD（展示层次关系）
+
+## 代码与配置示例
+
+研究报告中应包含实际的技术示例（如适用）：
+- JSON Schema / 配置文件示例
+- API 请求/响应示例
+- HTTP 头和协议字段
+- SDK 代码片段
+- 用 ```json / ```http / ```bash 等标记代码块
+
+## 文件提取
+
+```bash
+# PDF, PPT, PPTX, DOCX（用户环境使用 python3.12）
+python3.12 -m markitdown <filepath>
+
+# 如果 markitdown 未安装
+pip install "markitdown[all]"
+```
+
+## Web 研究策略
+
+- 使用 `remote_web_search` 获取最新信息
+- 使用 `webFetch` 读取特定文档页面（优先 mode="full" 获取完整内容）
+- **并行搜索**：同时发起多个搜索查询覆盖不同维度
+- **迭代深化**：基于初始结果进行 2-3 轮深入搜索
+- 始终引用来源并附链接
+- 优先官方文档，其次行业分析，最后博客
+- 关键事实交叉验证多个来源
+
+## 语言
+
+- 匹配用户语言（默认：中文）
+- 技术术语首次出现时保留英文原文并附中文解释
+- 后续出现可直接使用中文或英文缩写
