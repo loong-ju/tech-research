@@ -50,18 +50,26 @@
 **适用场景**: AWS 原生环境实施
 
 **主要内容**:
-- ✅ 动态阈值实现（Anomaly Detection）
-- ✅ 复合告警实现（Composite Alarms）
-- ✅ 告警关联引擎实现（EventBridge + Lambda）
-- ✅ 多数据点评估（M out of N）
-- ✅ 复合指标告警（Metric Math）
-- ✅ 完整的部署和运维指南
+- ✅ 概述：CloudWatch 原生能力与自建关联引擎的三层递进
+- ✅ 整体架构与组件协同（架构总览、职责划分、端到端数据流、组件选型、双通道容错、成本估算）
+- ✅ **第一部分：CloudWatch 原生能力**
+  - 动态阈值实现（Anomaly Detection）
+  - 复合告警实现（Composite Alarms + ActionsSuppressor）
+  - 多数据点评估（M out of N）
+  - 复合指标告警（Metric Math）
+- ✅ **第二部分：自建告警关联引擎**
+  - 架构设计（EventBridge + Lambda + DynamoDB）
+  - EventBridge 规则配置
+  - Lambda: 告警接收（alert-intake）
+  - Lambda: 告警关联分析（alert-correlator）
+  - Lambda 部署 Terraform
 
 **关键亮点**:
-- 完整的 Python 代码实现
-- 详细的中文代码注释
+- 三层递进的清晰架构（评估 → 静态组合/抑制 → 动态关联引擎）
+- 完整的 Python 代码实现 + 详细中文注释
 - Terraform 配置示例
-- 部署步骤和故障排查
+- 双通道容错设计（原生直通 + 关联引擎增强）
+- 组件选型理由与成本估算
 
 ---
 
@@ -69,18 +77,27 @@
 **适用场景**: 开源技术栈环境实施
 
 **主要内容**:
-- ✅ Alertmanager 完整配置
-- ✅ Prometheus 告警规则实现
-- ✅ 自定义告警关联服务（Python + Flask + Redis）
-- ✅ 动态阈值 PromQL 实现
-- ✅ Grafana 可视化配置
-- ✅ Docker/Kubernetes 部署
+- ✅ 概述：Prometheus 原生能力与自建关联引擎的三层递进
+- ✅ 整体架构与组件协同（架构总览、职责划分、端到端数据流、组件选型、双通道容错、成本估算）
+- ✅ **第一部分：Prometheus + Alertmanager 原生能力**
+  - 动态阈值规则（PromQL 统计函数：均值+标准差、分位数、趋势预测）
+  - 抗噪音规则（for 持续时间、count_over_time 近似 M-of-N、多条件 AND）
+  - Recording Rules 与复合条件规则（预计算指标、系统健康评分、SLO 告警）
+  - Alertmanager 完整配置（group_by、inhibit_rules、多级路由、silences）
+- ✅ **第二部分：自建告警关联引擎**
+  - 架构设计（Flask + Redis + Celery）
+  - Flask Webhook 接收服务（对应 CloudWatch 的 alert-intake Lambda）
+  - Celery 关联分析 Worker（根因评分算法 + 多根因识别，与设计文档对齐）
+  - Docker Compose / Kubernetes 部署
+  - 告警风暴处理示例（单根因 + 多根因 + 层次二/三协同）
 
 **关键亮点**:
-- 完整的 YAML 配置文件
-- 详细的配置注释
-- Python 关联服务完整代码
-- 容器化部署方案
+- 三层递进的清晰架构（评估 → 标签分组/抑制 → 动态关联引擎）
+- 与 CloudWatch 方案的全面对比（每个章节都有对照说明）
+- 完整的 PromQL 规则 + Alertmanager YAML + Python 代码
+- 根因评分算法与设计文档（02_solution_design.md）完全对齐
+- 双通道容错设计（Alertmanager 原生直通 + 关联引擎增强）
+- 生产级 K8s 部署配置（HPA 自动扩缩、健康检查、Secret 管理）
 
 ---
 

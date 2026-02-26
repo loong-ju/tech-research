@@ -1,2 +1,6 @@
 .kiro/
 .skill/
+node_modules
+*.json
+.skill
+.pptx
