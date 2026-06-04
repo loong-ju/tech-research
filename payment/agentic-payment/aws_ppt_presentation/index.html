@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1440, initial-scale=1" />
+<title>Agentic Payment — Past, Present, Future · for AWS Customers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=Manrope:wght@300..800&family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0A0E14;
+    --ink-2:#0F141F;
+    --paper:#F5EEDC;
+    --paper-2:#E6DDC5;
+    --cream:#FBF6E7;
+    --aws:#FF9900;
+    --aws-2:#FFB84D;
+    --cyan:#4ED8E5;
+    --plum:#B18CF5;
+    --rust:#D35E2E;
+    --moss:#7FA65A;
+    --rule:rgba(245,238,220,.12);
+    --rule-paper:rgba(10,14,20,.12);
+    --mute:#8C8B84;
+    --mute-ink:#6B727A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#000;color:var(--paper);font-family:"Manrope",sans-serif;-webkit-font-smoothing:antialiased;}
+  body{display:flex;flex-direction:column;align-items:center;gap:28px;padding:40px 0 80px;}
+  .slide{
+    width:1280px;height:800px;position:relative;overflow:hidden;
+    background:var(--ink);color:var(--paper);
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+    border-radius:2px;
+  }
+  .slide.paper{background:var(--paper);color:var(--ink);}
+  .slide.cream{background:var(--cream);color:var(--ink);}
+  .slide.deep{background:var(--ink-2);}
+  .slide.gradient{background:
+    radial-gradient(60% 80% at 20% 0%, rgba(255,153,0,.14), transparent 60%),
+    radial-gradient(50% 70% at 90% 100%, rgba(78,216,229,.12), transparent 60%),
+    var(--ink);
+  }
+
+  /* film grain */
+  .slide::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.6 0 0 0 0 0.55 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity:.9;mix-blend-mode:overlay;
+  }
+  .slide.paper::before{mix-blend-mode:multiply;opacity:.55;}
+
+  /* page chrome */
+  .chrome{
+    position:absolute;inset:32px 48px;
+    display:flex;flex-direction:column;z-index:2;
+  }
+  .meta{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--mute);
+  }
+  .slide.paper .meta, .slide.cream .meta{color:var(--mute-ink);}
+  .meta .l,.meta .r{display:flex;gap:16px;align-items:center;}
+  .meta .dot{width:6px;height:6px;background:var(--aws);border-radius:50%;display:inline-block;}
+  .meta .rule{flex:1;height:1px;background:var(--rule);margin:0 20px;}
+  .slide.paper .meta .rule,.slide.cream .meta .rule{background:var(--rule-paper);}
+  .pnum{font-feature-settings:"tnum" 1;}
+
+  /* typography */
+  .display{font-family:"Fraunces",serif;font-variation-settings:"opsz" 144,"SOFT" 50,"WONK" 1;font-weight:400;line-height:.92;letter-spacing:-.02em;}
+  .display em{font-style:italic;font-variation-settings:"opsz" 144,"SOFT" 100,"WONK" 1;color:var(--aws);}
+  .display .ink{color:var(--paper);}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--aws);}
+  .kicker{font-family:"Fraunces",serif;font-style:italic;font-weight:350;color:var(--paper-2);}
+  .slide.paper .kicker,.slide.cream .kicker{color:#44453E;}
+  .body{font-family:"Manrope";font-size:15px;line-height:1.5;color:#BFB9A8;}
+  .slide.paper .body,.slide.cream .body{color:#3E3E38;}
+  .mono{font-family:"JetBrains Mono",monospace;}
+
+  /* =============== COVER =============== */
+  .cover{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;flex:1;padding-top:12px;}
+  .cover .title{align-self:end;position:relative;}
+  .cover h1{font-size:160px;letter-spacing:-.05em;}
+  .cover h1 .line2{display:block;padding-left:220px;}
+  .cover h1 .line3{display:block;font-style:italic;color:var(--aws);padding-left:60px;}
+  .cover .stamp{
+    position:absolute;right:-10px;top:-30px;transform:rotate(7deg);
+    border:1.5px solid var(--aws);color:var(--aws);
+    padding:10px 20px;font-family:"JetBrains Mono";font-size:11px;letter-spacing:.24em;
+    text-transform:uppercase;
+  }
+  .cover aside{align-self:end;display:flex;flex-direction:column;gap:18px;padding-bottom:20px;border-left:1px solid var(--rule);padding-left:28px;}
+  .cover aside .tag{font-family:"JetBrains Mono";font-size:10.5px;color:var(--cyan);letter-spacing:.2em;text-transform:uppercase;}
+  .cover aside p{font-family:"Fraunces";font-size:22px;font-weight:300;line-height:1.25;color:var(--paper);font-variation-settings:"opsz" 30;}
+  .cover aside p em{font-style:italic;color:var(--aws);}
+  .cover aside .bylines{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:10px;}
+  .cover aside .bylines div{font-family:"JetBrains Mono";font-size:11px;color:var(--mute);line-height:1.6;}
+  .cover aside .bylines b{display:block;color:var(--paper);font-weight:500;font-family:"Manrope";font-size:12px;letter-spacing:.06em;}
+  .cover .ticker{
+    position:absolute;bottom:0;left:0;right:0;
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    padding:14px 0;display:flex;gap:48px;
+    font-family:"JetBrains Mono";font-size:11px;letter-spacing:.18em;color:var(--mute);
+    white-space:nowrap;overflow:hidden;
+  }
+  .ticker .t{display:flex;gap:8px;align-items:center;}
+  .ticker .t b{color:var(--aws);font-family:"Manrope";font-weight:700;letter-spacing:.04em;font-size:12px;}
+  .ticker .up{color:var(--moss);}
+  .ticker .dn{color:var(--rust);}
+
+  /* side stack numbers (volume / page mark) */
+  .volmark{
+    position:absolute;left:-6px;top:120px;
+    writing-mode:vertical-rl;transform:rotate(180deg);
+    font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.3em;color:var(--mute);
+  }
+  .slide.paper .volmark,.slide.cream .volmark{color:var(--mute-ink);}
+
+  /* Generic slide header */
+  .hed{display:grid;grid-template-columns:160px 1fr auto;align-items:end;gap:32px;padding-top:6px;}
+  .hed .sect{font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--aws);}
+  .hed h2{font-family:"Fraunces";font-size:64px;line-height:.96;letter-spacing:-.03em;font-weight:400;font-variation-settings:"opsz" 144,"SOFT" 50;}
+  .hed h2 em{color:var(--aws);font-style:italic;}
+  .slide.paper .hed h2, .slide.cream .hed h2{color:#131313;}
+  .hed .rdate{font-family:"JetBrains Mono";font-size:11px;color:var(--mute);}
+  .slide.paper .hed .rdate,.slide.cream .hed .rdate{color:var(--mute-ink);}
+
+  /* =============== TOC =============== */
+  .toc{flex:1;display:grid;grid-template-columns:1.4fr .9fr;gap:80px;padding-top:50px;}
+  .toc ol{list-style:none;counter-reset:toc;}
+  .toc li{
+    counter-increment:toc;display:grid;grid-template-columns:48px 1fr 60px;
+    align-items:baseline;gap:14px;
+    padding:18px 0;border-bottom:1px dashed var(--rule);
+  }
+  .toc li:first-child{border-top:1px dashed var(--rule);}
+  .toc li::before{
+    content:counter(toc,decimal-leading-zero);
+    font-family:"JetBrains Mono";color:var(--aws);font-size:12px;letter-spacing:.12em;
+  }
+  .toc li .tt{font-family:"Fraunces";font-size:24px;font-weight:400;letter-spacing:-.01em;font-variation-settings:"opsz" 40;}
+  .toc li .tt em{font-style:italic;color:var(--paper-2);}
+  .toc li .pg{font-family:"JetBrains Mono";font-size:11px;color:var(--mute);text-align:right;}
+  .toc .big{padding-right:10px;}
+  .toc .note{
+    border-top:1px solid var(--rule);padding-top:26px;color:#BFB9A8;
+    font-family:"Fraunces";font-size:18px;line-height:1.45;
+  }
+  .toc .note em{color:var(--aws);}
+  .toc .calibration{margin-top:24px;font-family:"JetBrains Mono";font-size:10px;letter-spacing:.18em;color:var(--mute);}
+  .toc .calibration b{color:var(--cyan);font-weight:500;}
+
+  /* =============== BIG Q =============== */
+  .qslide{flex:1;display:grid;grid-template-columns:1fr 320px;gap:40px;align-items:stretch;padding-top:20px;}
+  .qslide .q{align-self:center;}
+  .qslide .q .mark{font-family:"Fraunces";font-size:180px;color:var(--aws);line-height:.6;display:block;margin-bottom:-30px;font-style:italic;}
+  .qslide .q h2{font-family:"Fraunces";font-size:96px;font-weight:350;line-height:1;letter-spacing:-.035em;}
+  .qslide .q h2 em{font-style:italic;color:var(--aws);}
+  .qslide .q h2 .stroke{-webkit-text-stroke:1.2px var(--paper);color:transparent;}
+  .qslide .q p.support{font-family:"Fraunces";font-size:20px;margin-top:34px;line-height:1.35;color:var(--paper-2);max-width:760px;font-style:italic;font-weight:300;}
+  .qslide .side{border-left:1px solid var(--rule);padding-left:26px;display:flex;flex-direction:column;gap:32px;justify-content:space-between;padding-bottom:6px;}
+  .qslide .side .stat b{display:block;font-family:"Fraunces";font-size:88px;line-height:.9;color:var(--paper);letter-spacing:-.04em;font-variation-settings:"opsz" 144;}
+  .qslide .side .stat b em{color:var(--aws);font-style:italic;}
+  .qslide .side .stat span{font-family:"Manrope";font-size:14px;color:#BFB9A8;display:block;margin-top:10px;line-height:1.4;}
+  .qslide .side .footnote{font-family:"JetBrains Mono";font-size:10.5px;color:var(--mute);letter-spacing:.14em;text-transform:uppercase;}
+
+  /* =============== PAST / HISTORY =============== */
+  .two-col{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:56px;padding-top:36px;}
+  .two-col .col h3{font-family:"Fraunces";font-size:42px;line-height:1.02;letter-spacing:-.02em;margin-bottom:18px;font-variation-settings:"opsz" 80;font-weight:400;}
+  .two-col .col h3 em{font-style:italic;color:var(--aws);}
+  .two-col .col p{font-family:"Fraunces";font-size:19px;line-height:1.45;color:var(--paper-2);font-weight:300;}
+  .two-col .col p + p{margin-top:14px;}
+  .two-col .col ul{list-style:none;margin-top:18px;border-top:1px solid var(--rule);padding-top:14px;}
+  .two-col .col li{display:grid;grid-template-columns:80px 1fr;padding:10px 0;border-bottom:1px solid var(--rule);font-family:"JetBrains Mono";font-size:12px;letter-spacing:.04em;color:#BFB9A8;}
+  .two-col .col li b{color:var(--aws);font-weight:500;}
+  .slide.paper .two-col .col p, .slide.cream .two-col .col p{color:#35342E;}
+  .slide.paper .two-col .col li, .slide.cream .two-col .col li{color:#35342E;border-color:var(--rule-paper);}
+  .slide.paper .two-col .col ul,.slide.cream .two-col .col ul{border-color:var(--rule-paper);}
+
+  /* The breakdown grid — five gaps */
+  .gaps{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding-top:30px;}
+  .gap{border:1px solid var(--rule);padding:22px 18px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;}
+  .gap .n{font-family:"Fraunces";font-size:76px;line-height:.82;color:var(--aws);letter-spacing:-.04em;}
+  .gap h4{font-family:"Fraunces";font-size:28px;letter-spacing:-.02em;line-height:.98;font-weight:400;}
+  .gap h4 em{font-style:italic;color:var(--aws);}
+  .gap p{font-family:"Manrope";font-size:13.5px;line-height:1.4;color:#BFB9A8;}
+  .gap .solv{margin-top:auto;border-top:1px dashed var(--rule);padding-top:10px;font-family:"JetBrains Mono";font-size:10.5px;color:var(--cyan);letter-spacing:.1em;line-height:1.5;}
+
+  /* =============== TIMELINE =============== */
+  .timeline{flex:1;padding-top:26px;display:flex;flex-direction:column;gap:20px;}
+  .tl-wrap{position:relative;height:360px;margin-top:10px;}
+  .tl-axis{position:absolute;left:0;right:0;top:180px;height:1px;background:var(--rule);}
+  .tl-axis .tk{position:absolute;top:-4px;width:1px;height:9px;background:var(--mute);}
+  .tl-years{display:flex;justify-content:space-between;font-family:"JetBrains Mono";font-size:11px;color:var(--mute);margin-top:4px;padding-top:190px;border:none;}
+  .tl-point{
+    position:absolute;transform:translate(-50%,0);display:flex;flex-direction:column;align-items:center;gap:8px;
+    max-width:150px;text-align:center;
+  }
+  .tl-point.up{bottom:170px;}
+  .tl-point.dn{top:184px;}
+  .tl-point .node{
+    width:12px;height:12px;border-radius:50%;background:var(--aws);
+    box-shadow:0 0 0 4px rgba(255,153,0,.15);
+  }
+  .tl-point.cyan .node{background:var(--cyan);box-shadow:0 0 0 4px rgba(78,216,229,.15);}
+  .tl-point.plum .node{background:var(--plum);box-shadow:0 0 0 4px rgba(177,140,245,.15);}
+  .tl-point .date{font-family:"JetBrains Mono";font-size:10.5px;color:var(--mute);letter-spacing:.1em;}
+  .tl-point .label{font-family:"Fraunces";font-size:14px;font-weight:400;color:var(--paper);line-height:1.15;font-variation-settings:"opsz" 30;}
+  .tl-point.cyan .label em, .tl-point em{color:var(--aws);font-style:italic;}
+  .tl-point .stem{width:1px;height:36px;background:linear-gradient(to bottom,transparent,var(--rule));}
+  .tl-point.up .stem{background:linear-gradient(to top,transparent,var(--rule));}
+  .tl-point.up{flex-direction:column-reverse;}
+
+  /* =============== LANDSCAPE GRID =============== */
+  .landscape{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;gap:14px;padding-top:24px;}
+  .player{
+    background:rgba(255,255,255,.02);border:1px solid var(--rule);
+    padding:20px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;
+  }
+  .player .head{display:flex;justify-content:space-between;align-items:baseline;}
+  .player .logo{font-family:"Fraunces";font-size:26px;font-weight:500;letter-spacing:-.02em;color:var(--paper);line-height:1;}
+  .player .logo em{font-style:italic;color:var(--aws);}
+  .player .tag{font-family:"JetBrains Mono";font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);}
+  .player .sub{font-family:"Manrope";font-size:12px;color:#B7B1A1;}
+  .player .who{font-family:"JetBrains Mono";font-size:10.5px;color:var(--mute);}
+  .player p{font-family:"Fraunces";font-size:14.5px;line-height:1.4;color:#D6CEB8;font-weight:300;font-variation-settings:"opsz" 20;}
+  .player .meta-row{display:flex;justify-content:space-between;border-top:1px dashed var(--rule);padding-top:8px;font-family:"JetBrains Mono";font-size:10px;color:var(--mute);letter-spacing:.08em;}
+  .player.open{border-color:rgba(78,216,229,.35);}
+  .player.card{border-color:rgba(255,153,0,.35);}
+  .player.closed{border-color:rgba(211,94,46,.35);}
+  .player.chain{border-color:rgba(177,140,245,.35);}
+  .player .chip{position:absolute;top:16px;right:16px;font-family:"JetBrains Mono";font-size:9px;letter-spacing:.18em;color:var(--paper);
+    padding:4px 8px;border:1px solid var(--rule);border-radius:999px;}
+  .player.open .chip{color:var(--cyan);border-color:rgba(78,216,229,.4);}
+  .player.card .chip{color:var(--aws);border-color:rgba(255,153,0,.4);}
+  .player.closed .chip{color:var(--rust);border-color:rgba(211,94,46,.4);}
+  .player.chain .chip{color:var(--plum);border-color:rgba(177,140,245,.4);}
+
+  /* =============== DATA PANEL =============== */
+  .data{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;padding-top:40px;}
+  .mega-number{font-family:"Fraunces";font-size:220px;line-height:.82;letter-spacing:-.05em;color:var(--paper);font-variation-settings:"opsz" 144,"SOFT" 30,"WONK" 1;}
+  .mega-number em{font-style:italic;color:var(--aws);}
+  .mega-caption{font-family:"Fraunces";font-size:26px;font-weight:300;line-height:1.25;color:var(--paper-2);margin-top:14px;font-style:italic;}
+  .datalist{display:flex;flex-direction:column;gap:10px;align-self:end;}
+  .datalist .row{
+    display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;
+    padding:12px 0;border-bottom:1px solid var(--rule);
+  }
+  .datalist .row b{font-family:"Fraunces";font-size:34px;color:var(--aws);font-variation-settings:"opsz" 40;letter-spacing:-.02em;font-weight:500;}
+  .datalist .row span{font-family:"Manrope";font-size:13.5px;color:#BFB9A8;line-height:1.35;}
+  .datalist .row span b{font-family:"Manrope";font-size:13.5px;color:var(--paper);font-weight:600;display:inline;background:none;letter-spacing:0;}
+  .datalist .caption{font-family:"JetBrains Mono";font-size:10px;color:var(--mute);letter-spacing:.18em;text-transform:uppercase;margin-top:8px;}
+
+  /* =============== STACK =============== */
+  .stack{flex:1;display:grid;grid-template-columns:1fr 1.2fr;gap:42px;padding-top:36px;}
+  .stack .intro h3{font-family:"Fraunces";font-size:38px;line-height:1;letter-spacing:-.02em;margin-bottom:16px;font-weight:400;}
+  .stack .intro h3 em{color:var(--aws);font-style:italic;}
+  .stack .intro p{font-family:"Fraunces";font-size:18px;line-height:1.45;color:var(--paper-2);font-weight:300;}
+  .stack .intro p + p{margin-top:12px;}
+  .stack .intro .legend{margin-top:28px;border-top:1px solid var(--rule);padding-top:16px;display:flex;flex-direction:column;gap:8px;font-family:"JetBrains Mono";font-size:11px;color:#BFB9A8;letter-spacing:.06em;}
+  .stack .intro .legend span::before{content:"";display:inline-block;width:8px;height:8px;margin-right:10px;vertical-align:middle;}
+  .stack .intro .legend .l1::before{background:var(--aws);}
+  .stack .intro .legend .l2::before{background:var(--cyan);}
+  .stack .intro .legend .l3::before{background:var(--plum);}
+  .stack .intro .legend .l4::before{background:var(--moss);}
+  .stack .intro .legend .l5::before{background:var(--rust);}
+
+  .layers{display:flex;flex-direction:column;gap:8px;}
+  .layer{
+    display:grid;grid-template-columns:80px 1fr 160px;align-items:center;
+    padding:14px 18px;border:1px solid var(--rule);background:rgba(255,255,255,.015);
+    transition:background .2s;
+  }
+  .layer .lid{font-family:"JetBrains Mono";font-size:10.5px;color:var(--mute);letter-spacing:.16em;}
+  .layer .lname{font-family:"Fraunces";font-size:22px;font-weight:400;letter-spacing:-.015em;}
+  .layer .lname em{font-style:italic;color:var(--aws);}
+  .layer .llist{font-family:"JetBrains Mono";font-size:10.5px;color:var(--paper-2);letter-spacing:.04em;line-height:1.45;text-align:right;}
+  .layer .llist em{font-style:normal;color:var(--aws);}
+  .layer.l1{border-left:3px solid var(--aws);}
+  .layer.l2{border-left:3px solid var(--cyan);}
+  .layer.l3{border-left:3px solid var(--plum);}
+  .layer.l4{border-left:3px solid var(--moss);}
+  .layer.l5{border-left:3px solid var(--rust);}
+
+  /* =============== FUTURE scenario =============== */
+  .futures{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding-top:32px;}
+  .future{border:1px solid var(--rule);padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;}
+  .future .badge{position:absolute;top:-10px;left:24px;background:var(--ink);padding:0 10px;font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.24em;color:var(--aws);}
+  .future h4{font-family:"Fraunces";font-size:32px;line-height:1;letter-spacing:-.02em;font-weight:400;}
+  .future h4 em{color:var(--aws);font-style:italic;}
+  .future .score{display:flex;gap:4px;margin-top:4px;}
+  .future .score i{width:18px;height:3px;background:rgba(255,255,255,.18);display:inline-block;}
+  .future .score i.on{background:var(--aws);}
+  .future p{font-family:"Fraunces";font-size:15px;line-height:1.5;color:#CFC8B5;font-weight:300;}
+  .future ul{list-style:none;display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--rule);padding-top:12px;}
+  .future li{font-family:"Manrope";font-size:12px;line-height:1.45;color:#BFB9A8;padding-left:14px;position:relative;}
+  .future li::before{content:"→";position:absolute;left:0;color:var(--aws);font-family:"JetBrains Mono";}
+  .future .who{font-family:"JetBrains Mono";font-size:10px;letter-spacing:.18em;color:var(--mute);text-transform:uppercase;border-top:1px solid var(--rule);padding-top:10px;}
+  .future.winner{background:radial-gradient(80% 60% at 50% 0%,rgba(255,153,0,.08),transparent);border-color:rgba(255,153,0,.4);}
+
+  /* =============== 2030 STACK =============== */
+  .stack2030{flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;padding-top:40px;}
+  .stack2030 .desc h3{font-family:"Fraunces";font-size:52px;line-height:.95;letter-spacing:-.025em;font-weight:400;}
+  .stack2030 .desc h3 em{color:var(--aws);font-style:italic;}
+  .stack2030 .desc p{font-family:"Fraunces";font-size:18px;line-height:1.45;color:var(--paper-2);font-weight:300;margin-top:18px;}
+  .stack2030 .desc .pull{margin-top:28px;border-left:3px solid var(--aws);padding:4px 0 4px 18px;font-family:"Fraunces";font-size:17px;font-style:italic;line-height:1.4;color:var(--paper);}
+  .futurestack{display:flex;flex-direction:column;gap:6px;}
+  .fs-layer{display:grid;grid-template-columns:1fr;padding:14px 18px;border:1px solid var(--rule);background:rgba(255,255,255,.02);}
+  .fs-layer .ltitle{display:flex;justify-content:space-between;align-items:baseline;}
+  .fs-layer .ltitle h5{font-family:"Fraunces";font-size:18px;font-weight:400;letter-spacing:-.01em;}
+  .fs-layer .ltitle h5 em{color:var(--aws);font-style:italic;}
+  .fs-layer .ltitle .num{font-family:"JetBrains Mono";font-size:10px;color:var(--mute);letter-spacing:.2em;}
+  .fs-layer .lbody{font-family:"JetBrains Mono";font-size:11px;color:#B7B1A1;margin-top:4px;line-height:1.5;}
+
+  /* =============== AWS hero / opportunity =============== */
+  .aws-hero{flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center;padding-top:30px;}
+  .aws-hero h2{font-family:"Fraunces";font-size:108px;line-height:.9;letter-spacing:-.04em;font-weight:350;}
+  .aws-hero h2 em{font-style:italic;color:var(--aws);}
+  .aws-hero p.lede{font-family:"Fraunces";font-size:20px;line-height:1.4;color:var(--paper-2);font-weight:300;margin-top:24px;max-width:540px;font-style:italic;}
+  .aws-hero .right{display:flex;flex-direction:column;gap:10px;}
+  .aws-hero .tile{border:1px solid var(--rule);padding:18px 20px;position:relative;}
+  .aws-hero .tile .n{position:absolute;right:18px;top:16px;font-family:"JetBrains Mono";font-size:11px;color:var(--aws);letter-spacing:.18em;}
+  .aws-hero .tile h5{font-family:"Fraunces";font-size:20px;letter-spacing:-.01em;font-weight:500;}
+  .aws-hero .tile h5 em{color:var(--aws);font-style:italic;}
+  .aws-hero .tile p{font-family:"Manrope";font-size:13px;color:#BFB9A8;line-height:1.45;margin-top:6px;}
+
+  /* ===== AWS Capability grid ===== */
+  .cap-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto auto;gap:14px;padding-top:30px;}
+  .cap{border:1px solid var(--rule);padding:20px;display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.02);position:relative;}
+  .cap .glyph{
+    width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    font-family:"Fraunces";font-size:28px;color:var(--aws);border:1.5px solid var(--aws);border-radius:999px;font-variation-settings:"opsz" 40;
+  }
+  .cap h5{font-family:"Fraunces";font-size:22px;letter-spacing:-.015em;line-height:1.05;font-weight:500;}
+  .cap h5 em{color:var(--aws);font-style:italic;}
+  .cap .svc{font-family:"JetBrains Mono";font-size:10.5px;color:var(--cyan);letter-spacing:.1em;}
+  .cap p{font-family:"Manrope";font-size:12.5px;color:#BFB9A8;line-height:1.45;}
+  .cap .link{margin-top:auto;font-family:"JetBrains Mono";font-size:10px;color:var(--mute);letter-spacing:.14em;border-top:1px dashed var(--rule);padding-top:8px;}
+  .cap.span2{grid-column:span 2;}
+
+  /* ===== Four Strategic Questions ===== */
+  .qfour{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding-top:34px;}
+  .qcard{border:1px solid var(--rule);padding:22px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,rgba(255,153,0,.05),transparent 60%);}
+  .qcard .num{font-family:"Fraunces";font-size:72px;color:var(--aws);line-height:.8;letter-spacing:-.05em;font-variation-settings:"opsz" 144;}
+  .qcard h5{font-family:"Fraunces";font-size:22px;letter-spacing:-.015em;line-height:1.1;font-weight:400;}
+  .qcard h5 em{font-style:italic;color:var(--aws);}
+  .qcard p{font-family:"Manrope";font-size:12.5px;line-height:1.5;color:#BFB9A8;}
+  .qcard .ans{margin-top:auto;border-top:1px solid var(--rule);padding-top:10px;font-family:"JetBrains Mono";font-size:10.5px;color:var(--cyan);letter-spacing:.04em;line-height:1.5;}
+  .qcard .ans b{color:var(--aws);font-weight:500;}
+
+  /* ===== Roadmap ===== */
+  .road{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding-top:24px;}
+  .phase{border:1px solid var(--rule);padding:22px;display:flex;flex-direction:column;gap:14px;}
+  .phase .ph{font-family:"JetBrains Mono";font-size:10.5px;letter-spacing:.22em;color:var(--aws);}
+  .phase h5{font-family:"Fraunces";font-size:28px;line-height:1;letter-spacing:-.02em;font-weight:400;}
+  .phase h5 em{color:var(--aws);font-style:italic;}
+  .phase .range{font-family:"JetBrains Mono";font-size:11px;color:var(--cyan);letter-spacing:.08em;}
+  .phase ul{list-style:none;border-top:1px dashed var(--rule);padding-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .phase li{font-family:"Manrope";font-size:13px;line-height:1.45;color:#BFB9A8;padding-left:18px;position:relative;}
+  .phase li::before{content:"◆";position:absolute;left:0;top:1px;font-size:8px;color:var(--aws);}
+  .phase li b{color:var(--paper);font-weight:600;}
+
+  /* =============== CLOSER =============== */
+  .closer{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:60px;padding-top:40px;align-items:stretch;}
+  .closer .quote{align-self:center;}
+  .closer .quote .mark{font-family:"Fraunces";font-size:160px;line-height:.4;color:var(--aws);font-style:italic;display:block;}
+  .closer .quote h2{font-family:"Fraunces";font-size:62px;line-height:1.02;letter-spacing:-.03em;font-weight:350;}
+  .closer .quote h2 em{font-style:italic;color:var(--aws);}
+  .closer .quote .attr{margin-top:30px;font-family:"JetBrains Mono";font-size:11px;color:var(--mute);letter-spacing:.18em;text-transform:uppercase;}
+  .closer .call{border-left:1px solid var(--rule);padding-left:32px;display:flex;flex-direction:column;gap:22px;justify-content:space-between;padding-bottom:10px;}
+  .closer .call h5{font-family:"Fraunces";font-size:22px;line-height:1.2;font-weight:400;}
+  .closer .call h5 em{color:var(--aws);font-style:italic;}
+  .closer .call ul{list-style:none;display:flex;flex-direction:column;gap:14px;}
+  .closer .call li{padding:16px 0;border-top:1px solid var(--rule);display:grid;grid-template-columns:36px 1fr auto;gap:14px;align-items:center;}
+  .closer .call li .n{font-family:"JetBrains Mono";font-size:11px;color:var(--aws);letter-spacing:.12em;}
+  .closer .call li .t{font-family:"Fraunces";font-size:18px;font-weight:400;line-height:1.15;}
+  .closer .call li .t em{font-style:italic;color:var(--aws);}
+  .closer .call li .pg{font-family:"JetBrains Mono";font-size:10px;color:var(--mute);letter-spacing:.1em;}
+
+  /* fine crosshatch decoration */
+  .ornament{position:absolute;width:160px;height:160px;pointer-events:none;opacity:.45;}
+  .ornament.tr{top:-20px;right:-20px;
+    background:repeating-linear-gradient(45deg, transparent 0 8px, var(--aws) 8px 9px);
+    -webkit-mask:radial-gradient(closest-side, black 40%, transparent 70%);
+          mask:radial-gradient(closest-side, black 40%, transparent 70%);
+  }
+  .ornament.bl{bottom:-20px;left:-20px;
+    background:repeating-linear-gradient(135deg, transparent 0 8px, var(--cyan) 8px 9px);
+    -webkit-mask:radial-gradient(closest-side, black 40%, transparent 70%);
+          mask:radial-gradient(closest-side, black 40%, transparent 70%);
+    opacity:.3;
+  }
+
+  /* barcode */
+  .barcode{display:flex;gap:1px;height:20px;align-items:end;}
+  .barcode i{background:currentColor;width:2px;height:100%;display:block;}
+  .barcode i:nth-child(3n){height:60%;}
+  .barcode i:nth-child(5n){height:80%;width:1px;}
+  .barcode i:nth-child(7n){width:3px;}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================= -->
+<!-- SLIDE 01 · COVER                                                -->
+<!-- ============================================================= -->
+<section class="slide gradient">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>AWS · Customer Briefing</span><span class="rule"></span></div>
+      <div class="r"><span>Vol. 01 / 2026</span><span>·</span><span class="pnum">N°001</span></div>
+    </div>
+
+    <div class="volmark">AGENTIC PAYMENT — DOSSIER N°001 — FOR CUSTOMER REVIEW</div>
+
+    <div class="cover">
+      <div class="title">
+        <span class="eyebrow">A Dossier for AWS Customers · 2026·04</span>
+        <h1 class="display" style="margin-top:12px;">
+          <span class="ink">Agentic</span>
+          <span class="line2 ink">Payment</span>
+          <span class="line3">past, present, future</span>
+        </h1>
+        <div class="stamp">Confidential — Strategy</div>
+      </div>
+
+      <aside>
+        <span class="tag">— brief</span>
+        <p>When AI agents begin to transact on our behalf, the five-hundred-year-old assumption that <em>a human is at the checkout</em> quietly expires.</p>
+        <p style="font-size:18px;color:#D6CEB8;">This dossier maps the seven protocols redrawing commerce — and the <em>infrastructure role</em> AWS is positioned to play.</p>
+
+        <div class="bylines">
+          <div><b>Prepared by</b>AWS Customer Research</div>
+          <div><b>Audience</b>AWS Strategic Accounts</div>
+          <div><b>Period covered</b>2024·02 — 2026·02</div>
+          <div><b>Sources</b>McKinsey · Visa · Mastercard · Stripe · Google · Coinbase · OpenAI · AWS</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="ticker">
+      <span class="t"><b>UCP</b> Google · Jan 2026 <span class="up">▲ early</span></span>
+      <span class="t"><b>ACP</b> OpenAI+Stripe · Sep 2025 <span class="up">▲ live</span></span>
+      <span class="t"><b>AP2</b> Google · Sep 2025 <span class="up">▲ 60+ partners</span></span>
+      <span class="t"><b>x402</b> Coinbase · May 2025 <span class="up">▲ 100M+ tx</span></span>
+      <span class="t"><b>TAP</b> Visa · Oct 2025 <span class="up">▲ pilots</span></span>
+      <span class="t"><b>Agent Pay</b> Mastercard · Apr 2025 <span class="up">▲ live</span></span>
+      <span class="t"><b>Buy for Me</b> Amazon · Apr 2025 <span class="up">▲ 500k SKU</span></span>
+    </div>
+  </div>
+  <div class="ornament tr"></div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 02 · TABLE OF CONTENTS                                    -->
+<!-- ============================================================= -->
+<section class="slide deep">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>Table of Contents</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">002 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Contents</div>
+      <h2>What you will find <em>inside</em> this dossier.</h2>
+      <div class="rdate">2026·04·17</div>
+    </div>
+
+    <div class="toc">
+      <div class="big">
+        <ol>
+          <li><span class="tt">The <em>Past</em> — twenty years of clicking a button</span><span class="pg">04 · 05</span></li>
+          <li><span class="tt">The <em>Break</em> — five gaps agents cannot cross</span><span class="pg">06</span></li>
+          <li><span class="tt">The <em>Present</em> — a field map of seven protocols</span><span class="pg">07 · 08 · 09 · 10</span></li>
+          <li><span class="tt">The <em>Numbers</em> — a trillion-dollar shift</span><span class="pg">11</span></li>
+          <li><span class="tt">The <em>Future</em> — three bets, one likely stack</span><span class="pg">12 · 13</span></li>
+          <li><span class="tt">AWS — <em>the infrastructure role</em></span><span class="pg">14 · 15 · 16</span></li>
+          <li><span class="tt">What to do on <em>Monday</em></span><span class="pg">17</span></li>
+        </ol>
+      </div>
+
+      <div>
+        <p class="note">This is not a protocol spec. It is a <em>buyer's map</em> — written for the leaders who must decide whether to build, buy, or wait.</p>
+        <div class="calibration">
+          <div>DOCUMENT · AGNTC-PAY-2026-Q2</div>
+          <div>COVERAGE · <b>7</b> PROTOCOLS · <b>60+</b> PARTNERS</div>
+          <div>TRANSACTIONS TRACKED · <b>100M+</b> (x402)</div>
+          <div>MARKET ESTIMATE BY 2030 · <b>US$ 3T — 5T</b> (McK.)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 03 · HOOK — THE QUESTION                                  -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 01 · Hook</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">003 / 017</span></div>
+    </div>
+    <div class="volmark">§ 01 · THE QUESTION — AUTHOR: AWS — 2026</div>
+
+    <div class="qslide">
+      <div class="q">
+        <span class="mark">“</span>
+        <h2 class="display">
+          What happens<br/>
+          when the <em>customer</em><br/>
+          at your checkout<br/>
+          <span class="stroke">is not a</span> human?
+        </h2>
+        <p class="support">By 2030, an estimated <b style="color:var(--aws);font-weight:500;">25–30%</b> of all e-commerce transactions will be initiated — or completed — by an AI agent acting on behalf of someone. The browser, the form, the shopping cart — every assumption is about to move.</p>
+      </div>
+      <div class="side">
+        <div>
+          <div class="stat"><b>+4,<em>700%</em></b><span>growth in AI-driven traffic to retail sites in 2025, most of it mis-classified as bots by legacy defenses.</span></div>
+        </div>
+        <div>
+          <div class="stat"><b>US$<em>12B</em></b><span>incremental sales generated by Amazon's Rufus agent in 2025 — the first proof that agent-commerce is not a concept.</span></div>
+        </div>
+        <div>
+          <div class="footnote">— Sources: Visa, McKinsey, Amazon, Gartner, Akamai · 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 04 · THE PAST (paper)                                     -->
+<!-- ============================================================= -->
+<section class="slide paper">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 02 · The Past</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">004 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect" style="color:var(--rust);">— Chapter Two / Past</div>
+      <h2>For two decades, every checkout assumed<br/><em>a pair of human eyes</em>.</h2>
+      <div class="rdate">1995 → 2023</div>
+    </div>
+
+    <div class="two-col">
+      <div class="col">
+        <h3>The assumption that <em>held</em> — then didn't.</h3>
+        <p>From the Amazon 1-Click patent (1999) to Stripe's <span style="font-family:'JetBrains Mono';font-size:.85em;">payments.js</span> (2011), the entire web stack was tuned for one shape of commerce: a human, in a browser, dragging a finger across a screen.</p>
+        <p>CAPTCHAs, 3-D Secure pop-ups, device fingerprints, behavior biometrics, cart abandonment rescue — all of it was engineered around the pixel-level rhythm of a person hesitating on a page.</p>
+        <p>Then, between Feb 2024 and Apr 2025, four things happened in quick succession. The rhythm changed.</p>
+      </div>
+      <div class="col">
+        <h3>Four shocks, one <em>inflection</em>.</h3>
+        <ul>
+          <li><b>2024 · 02</b> Amazon Rufus launches in beta — the first platform-scale shopping agent.</li>
+          <li><b>2024 · 07</b> Rufus opens to all US users; conversations displace queries.</li>
+          <li><b>2025 · 04</b> Four industry moves in a single month: A2A, Buy for Me, Visa Intelligent Commerce, Mastercard Agent Pay.</li>
+          <li><b>2025 · 05</b> Coinbase revives HTTP 402 — a 30-year-old status code — for native on-chain payments.</li>
+          <li><b>2025 · 08</b> Amazon begins blocking major AI crawlers — a new protectionism emerges.</li>
+          <li><b>2025 · 09</b> ChatGPT Instant Checkout ships — the first billion-user agent commerce product.</li>
+        </ul>
+        <p style="margin-top:22px;font-family:'Fraunces';font-style:italic;font-size:18px;">The web that grew up around a human customer is now being rebuilt for a different one entirely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 05 · BROKEN POINTS (five gaps)                            -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 02 · The Break</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">005 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Five gaps</div>
+      <h2>The e-commerce stack breaks in <em>five places</em> when an agent walks up to it.</h2>
+      <div class="rdate">Dec 2024 → Feb 2026</div>
+    </div>
+
+    <div class="gaps">
+      <div class="gap">
+        <div class="n">01</div>
+        <h4><em>Discovery</em>.</h4>
+        <p>Merchants speak HTML; agents need machine-readable catalogs. No standard exists.</p>
+        <div class="solv">→ UCP · ACP Product Feed</div>
+      </div>
+      <div class="gap">
+        <div class="n">02</div>
+        <h4><em>Trust</em>.</h4>
+        <p>WAFs cannot tell a legitimate agent from a malicious bot. Good AI traffic is being blocked.</p>
+        <div class="solv">→ TAP · AP2 · Web Bot Auth</div>
+      </div>
+      <div class="gap">
+        <div class="n">03</div>
+        <h4><em>Intent</em>.</h4>
+        <p>A click used to imply authorization. Agents do not click. What proves the user meant it?</p>
+        <div class="solv">→ AP2 Mandate · Passkey</div>
+      </div>
+      <div class="gap">
+        <div class="n">04</div>
+        <h4><em>Payment</em>.</h4>
+        <p>Agents cannot hold credit cards. They need a delegated, narrow, revocable credential.</p>
+        <div class="solv">→ ACP SPT · Agentic Token · x402</div>
+      </div>
+      <div class="gap">
+        <div class="n">05</div>
+        <h4><em>Integration</em>.</h4>
+        <p>Every agent × every merchant is an <span class="mono" style="color:var(--aws);">N×N</span> problem. Someone must collapse it.</p>
+        <div class="solv">→ UCP unifier layer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 06 · TIMELINE                                             -->
+<!-- ============================================================= -->
+<section class="slide deep">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 03 · Field map</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">006 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Timeline · 23 months</div>
+      <h2>One month — <em>April 2025</em> — when everyone arrived at the same party.</h2>
+      <div class="rdate">2024·02 — 2026·02</div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-wrap">
+        <div class="tl-axis">
+          <span class="tk" style="left:3%"></span>
+          <span class="tk" style="left:18%"></span>
+          <span class="tk" style="left:33%"></span>
+          <span class="tk" style="left:48%"></span>
+          <span class="tk" style="left:63%"></span>
+          <span class="tk" style="left:78%"></span>
+          <span class="tk" style="left:95%"></span>
+        </div>
+
+        <!-- Above axis -->
+        <div class="tl-point up" style="left:5%;">
+          <div class="label">Amazon Rufus<br/><em>beta launches</em></div>
+          <div class="date">2024·02</div>
+          <div class="stem"></div>
+          <div class="node"></div>
+        </div>
+        <div class="tl-point up cyan" style="left:33%;">
+          <div class="label">Four players<br/>in <em>one month</em></div>
+          <div class="date">2025·04</div>
+          <div class="stem"></div>
+          <div class="node"></div>
+        </div>
+        <div class="tl-point up plum" style="left:48%;">
+          <div class="label">Coinbase <em>x402</em><br/>revives HTTP 402</div>
+          <div class="date">2025·05</div>
+          <div class="stem"></div>
+          <div class="node"></div>
+        </div>
+        <div class="tl-point up" style="left:70%;">
+          <div class="label">Visa <em>TAP</em> &<br/>ChatGPT Checkout</div>
+          <div class="date">2025·09—10</div>
+          <div class="stem"></div>
+          <div class="node"></div>
+        </div>
+        <div class="tl-point up cyan" style="left:93%;">
+          <div class="label">Google <em>UCP</em><br/>at NRF</div>
+          <div class="date">2026·01</div>
+          <div class="stem"></div>
+          <div class="node"></div>
+        </div>
+
+        <!-- Below axis -->
+        <div class="tl-point dn" style="left:18%;">
+          <div class="node"></div>
+          <div class="stem"></div>
+          <div class="date">2025·04</div>
+          <div class="label">Google <em>A2A</em> · Amazon <em>Buy for Me</em><br/>Visa Intelligent Commerce · MC Agent Pay</div>
+        </div>
+        <div class="tl-point dn plum" style="left:42%;">
+          <div class="node"></div>
+          <div class="stem"></div>
+          <div class="date">2025·06</div>
+          <div class="label">OpenAI + Stripe <em>ACP</em></div>
+        </div>
+        <div class="tl-point dn" style="left:58%;">
+          <div class="node"></div>
+          <div class="stem"></div>
+          <div class="date">2025·09</div>
+          <div class="label">Google <em>AP2</em><br/>60+ partners</div>
+        </div>
+        <div class="tl-point dn cyan" style="left:82%;">
+          <div class="node"></div>
+          <div class="stem"></div>
+          <div class="date">2025·12</div>
+          <div class="label">x402 crosses <em>100M</em> tx</div>
+        </div>
+      </div>
+
+      <div class="tl-years">
+        <span>2024 · Q1</span>
+        <span>Q3</span>
+        <span>2025 · Q1</span>
+        <span>Q2</span>
+        <span>Q3</span>
+        <span>Q4</span>
+        <span>2026 · Q1</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 07 · LANDSCAPE — seven players                             -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 03 · Present · Field of play</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">007 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Seven players</div>
+      <h2>Three philosophies. Seven protocols. <em>One open question</em> — who owns the trust layer?</h2>
+      <div class="rdate">as of 2026·02</div>
+    </div>
+
+    <div class="landscape">
+      <!-- Row 1: Open protocols -->
+      <div class="player open">
+        <span class="chip">Open · Orchestration</span>
+        <div class="head">
+          <div class="logo">U<em>C</em>P</div>
+        </div>
+        <div class="who">GOOGLE · NRF · 2026·01</div>
+        <p>A single vocabulary for the full commerce journey — discovery, checkout, post-purchase. Four transport bindings (REST · MCP · A2A · Embedded) collapse <span class="mono" style="color:var(--cyan)">N×N</span> into <span class="mono" style="color:var(--cyan)">1×N</span>.</p>
+        <div class="meta-row"><span>APACHE 2.0</span><span>20+ partners</span></div>
+      </div>
+
+      <div class="player open">
+        <span class="chip">Open · Checkout</span>
+        <div class="head"><div class="logo">A<em>C</em>P</div></div>
+        <div class="who">OPENAI + STRIPE · 2025·09</div>
+        <p>The first billion-user agent checkout. Product Feed + Agentic Checkout + a delegated Shared Payment Token that is merchant-bound, amount-bound, time-bound, single-use.</p>
+        <div class="meta-row"><span>CHATGPT LIVE</span><span>1M+ Shopify merchants</span></div>
+      </div>
+
+      <div class="player open">
+        <span class="chip">Open · Authorization</span>
+        <div class="head"><div class="logo">A<em>P</em>2</div></div>
+        <div class="who">GOOGLE · 2025·09</div>
+        <p>A cryptographic notary for agent spend. Three-layer Mandates (Intent → Cart → Payment) signed as W3C Verifiable Credentials. Payment-method agnostic, human-present and human-not-present.</p>
+        <div class="meta-row"><span>W3C VC</span><span>60+ partners</span></div>
+      </div>
+
+      <!-- Row 2: Card networks, closed, crypto -->
+      <div class="player card">
+        <span class="chip">Card network · Signed</span>
+        <div class="head"><div class="logo">Visa <em>TAP</em></div></div>
+        <div class="who">VISA + CLOUDFLARE · 2025·10</div>
+        <p>Three-layer RFC 9421 HTTP signatures — Agent, Consumer, Payment — verified at the WAF/CDN. Rides on 175M+ existing Visa acceptance points. Native HTTP 402 Browsing IOU.</p>
+        <div class="meta-row"><span>RFC 9421</span><span>200+ countries</span></div>
+      </div>
+
+      <div class="player card">
+        <span class="chip">Card network · Registry</span>
+        <div class="head"><div class="logo">MC Agent <em>Pay</em></div></div>
+        <div class="who">MASTERCARD · 2025·04</div>
+        <p>Register the agent first. Agentic Token binds card · agent ID · user rules (limits, MCC, geofence). Payment Passkey + Decision Intelligence round out the control plane.</p>
+        <div class="meta-row"><span>US · AU · LATAM live</span><span>1st AU tx · 2025·11</span></div>
+      </div>
+
+      <div class="player chain">
+        <span class="chip">Crypto-native</span>
+        <div class="head"><div class="logo">x<em>4</em>02</div></div>
+        <div class="who">COINBASE · 2025·05</div>
+        <p>HTTP 402 Payment Required — the status code that slept for 30 years. USDC settlement in ~2 s, zero protocol fee. Ideal for micropayments and agent-to-agent API calls.</p>
+        <div class="meta-row"><span>100M+ tx</span><span>$600M+ annualised</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="ornament tr"></div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 08 · WALLED GARDEN + RISK (Buy for Me spotlight)          -->
+<!-- ============================================================= -->
+<section class="slide cream">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 03 · Present · The outlier</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">008 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect" style="color:var(--rust);">— The walled garden</div>
+      <h2>Amazon <em>Buy for Me</em> — or, the case against going it alone.</h2>
+      <div class="rdate">live in the US · 500k+ SKU</div>
+    </div>
+
+    <div class="two-col" style="padding-top:30px;">
+      <div class="col">
+        <h3 style="color:#1a1a1a;">A bet on the <em>opposite direction</em>.</h3>
+        <p>While Google publishes open protocols and Stripe open-sources SDKs, Amazon went the other way: an end-to-end, in-house agent that browses third-party brand sites and checks out on behalf of the user — inside the Amazon app.</p>
+        <p>The business case is real — Rufus produced <b>US$12 billion</b> in incremental sales in 2025. But the strategy is already under pressure.</p>
+        <p style="font-family:'JetBrains Mono';font-size:13px;margin-top:20px;color:#1a1a1a;"><b>Forbes:</b> <i>"Google builds open protocol rails. Amazon builds a walled garden."</i></p>
+      </div>
+
+      <div class="col">
+        <ul style="border-top:1px solid var(--rule-paper);">
+          <li><b>28%</b>chargeback rate on agent-delegated purchases — triple the web average.</li>
+          <li><b>DOUBLE</b>Amazon blocks external AI crawlers via robots.txt — while its own agent scrapes third-party sites.</li>
+          <li><b>IP</b>Bobo Design Studio and others escalate to IP lawyers over unauthorised scraping.</li>
+          <li><b>OPT-OUT</b>Brands are enrolled by default; explicit opt-out required.</li>
+          <li><b>DMA</b>EU Digital Markets Act likely to force open-agent access on gatekeepers.</li>
+        </ul>
+
+        <p style="margin-top:26px;font-family:'Fraunces';font-style:italic;font-size:19px;color:#1a1a1a;">The lesson for every large retailer: <b style="color:var(--rust);font-style:normal;font-weight:600;">openness is not a virtue here — it is a moat</b>. Brands without a standards strategy will be shopped on someone else's terms.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 09 · THE STACK — layered diagram                          -->
+<!-- ============================================================= -->
+<section class="slide deep">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 03 · The stack</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">009 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Architecture</div>
+      <h2>These seven protocols do not compete. <em>They layer.</em></h2>
+      <div class="rdate">reference architecture · 2026</div>
+    </div>
+
+    <div class="stack">
+      <div class="intro">
+        <h3>A <em>stack</em>, not a winner.</h3>
+        <p>Read top-down, the agent commerce technology stack resolves into five layers — one each for semantics, orchestration, trust, transport, and settlement.</p>
+        <p>No single protocol is complete. The productive combinations are already emerging: <span class="mono" style="color:var(--aws)">ACP + AP2 + x402</span>, <span class="mono" style="color:var(--aws)">UCP + AP2 + cards</span>, <span class="mono" style="color:var(--aws)">ACP + TAP</span>.</p>
+
+        <div class="legend">
+          <span class="l1">Commerce semantics</span>
+          <span class="l2">Orchestration</span>
+          <span class="l3">Trust & authorization</span>
+          <span class="l4">Agent identity</span>
+          <span class="l5">Settlement</span>
+        </div>
+      </div>
+
+      <div class="layers">
+        <div class="layer l1">
+          <div class="lid">— 05</div>
+          <div class="lname">Commerce <em>semantics</em></div>
+          <div class="llist"><em>UCP</em> · full journey spec</div>
+        </div>
+        <div class="layer l2">
+          <div class="lid">— 04</div>
+          <div class="lname">Checkout <em>orchestration</em></div>
+          <div class="llist"><em>ACP</em> · Buy-for-Me · Shopify</div>
+        </div>
+        <div class="layer l3">
+          <div class="lid">— 03</div>
+          <div class="lname">Trust & <em>authorization</em></div>
+          <div class="llist"><em>AP2</em> · <em>TAP</em> · <em>MC Agent Pay</em></div>
+        </div>
+        <div class="layer l4">
+          <div class="lid">— 02</div>
+          <div class="lname">Agent <em>identity</em></div>
+          <div class="llist"><em>Web Bot Auth</em> · A2A · MCP</div>
+        </div>
+        <div class="layer l5">
+          <div class="lid">— 01</div>
+          <div class="lname"><em>Settlement</em></div>
+          <div class="llist">Visa · Mastercard · Stripe · <em>x402/USDC</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 10 · PHILOSOPHY — three bets                              -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 03 · Three philosophies</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">010 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— The three bets</div>
+      <h2>Open protocol, card-network extension, <em>or walled garden</em>.</h2>
+      <div class="rdate">Philosophy matters more than features</div>
+    </div>
+
+    <div class="futures" style="padding-top:30px;">
+      <div class="future winner">
+        <span class="badge">BET 01 · OPEN</span>
+        <h4>The <em>HTTP</em> bet.</h4>
+        <div class="score">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+        </div>
+        <p>If agent commerce becomes critical infrastructure, open standards always win the long game — HTTP over AOL, TCP/IP over OSI, HTML over Flash.</p>
+        <ul>
+          <li>UCP for discovery and orchestration.</li>
+          <li>AP2 Mandates for cryptographic authorization.</li>
+          <li>ACP for checkout, x402 for micropayments.</li>
+        </ul>
+        <div class="who">Google · OpenAI · Stripe · Coinbase</div>
+      </div>
+
+      <div class="future">
+        <span class="badge">BET 02 · CARD NETWORKS</span>
+        <h4>The <em>incumbents' move</em>.</h4>
+        <div class="score">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+        </div>
+        <p>Fiat settlement will still flow through card rails. The real fight is to hold on to the trust layer — the part that justifies 1.5 – 3% interchange.</p>
+        <ul>
+          <li>Visa bets <i>"standard"</i> — TAP signatures verified at the CDN.</li>
+          <li>Mastercard bets <i>"platform"</i> — agent registry + Agentic Token.</li>
+          <li>275M+ combined merchant endpoints, near-zero migration cost.</li>
+        </ul>
+        <div class="who">Visa · Mastercard · FIDO Alliance</div>
+      </div>
+
+      <div class="future">
+        <span class="badge" style="color:var(--rust);">BET 03 · WALLED GARDEN</span>
+        <h4>The <em>AOL</em> bet.</h4>
+        <div class="score">
+          <i class="on"></i><i class="on"></i><i></i><i></i><i></i>
+        </div>
+        <p>Keep the user inside. Build your own agent. Block the others at robots.txt. Protect US$56B of retail-media revenue.</p>
+        <ul>
+          <li>Buy for Me · 500k+ SKUs, but 28% chargeback rate.</li>
+          <li>Antitrust exposure — EU DMA, US FTC.</li>
+          <li>Long run: most likely demoted to <i>"super-merchant"</i> on open rails.</li>
+        </ul>
+        <div class="who">Amazon · potentially Apple, Meta</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 11 · MARKET DATA — huge numbers                           -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 04 · The numbers</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">011 / 017</span></div>
+    </div>
+    <div class="volmark">§ 04 · THE NUMBERS — A TRILLION-DOLLAR SHIFT</div>
+
+    <div class="hed">
+      <div class="sect">— Market</div>
+      <h2>The dollars are <em>already real</em>.</h2>
+      <div class="rdate">Sources · McKinsey · Gartner · OpenAI · Visa · Similarweb</div>
+    </div>
+
+    <div class="data">
+      <div>
+        <div class="mega-number">$<em>3</em>–<em>5</em>T</div>
+        <div class="mega-caption">global agentic-commerce spend projected by 2030<br/><span style="font-style:normal;font-size:13px;color:var(--mute);font-family:'JetBrains Mono';letter-spacing:.08em;">— McKinsey Agentic Commerce Report · 2025·10</span></div>
+      </div>
+
+      <div class="datalist">
+        <div class="row"><b>$900B–$1T</b><span>US B2C retail agent commerce by 2030.<br/><b>McKinsey</b></span></div>
+        <div class="row"><b>25–30%</b><span>share of e-commerce transactions via AI agents by 2030.<br/><b>Gartner</b></span></div>
+        <div class="row"><b>+340%</b><span>YoY growth in product queries on AI platforms.<br/><b>OpenAI</b></span></div>
+        <div class="row"><b>−23%</b><span>YoY decline in Google product search volume.<br/><b>Similarweb</b></span></div>
+        <div class="row"><b>51%</b><span>of Gen Z already start product search on an AI, not a search engine.<br/><b>OpenAI</b></span></div>
+        <div class="row"><b>$186B</b><span>annual bot-fraud losses — the blast radius of <i>"block everything"</i> defenses.<br/><b>Fingerprint</b></span></div>
+        <div class="caption">— Agentic commerce is not a 2028 story. <b style="color:var(--aws);">It is already the largest product-discovery shift since the iPhone.</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="ornament bl"></div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 12 · CONVERGENCE ROADMAP                                  -->
+<!-- ============================================================= -->
+<section class="slide deep">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 05 · Future · Convergence</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">012 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— Prediction</div>
+      <h2>By 2030, the seven protocols will have collapsed <em>into three layers</em>.</h2>
+      <div class="rdate">our expected end-state</div>
+    </div>
+
+    <div class="stack2030">
+      <div class="desc">
+        <h3>Three wins. Not <em>one</em>.</h3>
+        <p>The historical pattern is clear: infrastructure markets do not produce a single winner — they produce a stack. Open protocols take orchestration. Card networks hold trust and fiat settlement. Crypto-native rails own micropayments and agent-to-agent transfers.</p>
+        <p>Walled gardens, if they survive, do so as <i>super-merchants</i> on open rails — the way Amazon today accepts Visa.</p>
+
+        <div class="pull">
+          "Visa is betting on the <b style="font-weight:600;">standard</b>. Mastercard is betting on the <b style="font-weight:600;">platform</b>. Amazon is betting on the <b style="font-weight:600;">experience</b>. Google, OpenAI and Coinbase are betting on the <b style="font-weight:600;">protocol</b>. All four can be right — at different layers."
+        </div>
+      </div>
+
+      <div class="futurestack">
+        <div class="fs-layer">
+          <div class="ltitle"><h5>Semantics &amp; <em>Orchestration</em></h5><span class="num">— 05</span></div>
+          <div class="lbody">UCP (or its evolution) · ACP inside the checkout flow · MCP as transport · AEO replaces SEO</div>
+        </div>
+        <div class="fs-layer">
+          <div class="ltitle"><h5>Trust &amp; <em>Authorization</em></h5><span class="num">— 04</span></div>
+          <div class="lbody">AP2 Mandates (VC) for HNP · TAP signatures at the edge · MC registry for enterprise</div>
+        </div>
+        <div class="fs-layer">
+          <div class="ltitle"><h5>Agent <em>Identity</em></h5><span class="num">— 03</span></div>
+          <div class="lbody">Web Bot Auth (IETF) as the universal bot passport · FIDO Passkey for the human behind it</div>
+        </div>
+        <div class="fs-layer">
+          <div class="ltitle"><h5>Settlement · <em>fiat</em></h5><span class="num">— 02</span></div>
+          <div class="lbody">Visa / Mastercard for consumer scale · Stripe and global PSPs as the merchant-side PSP layer</div>
+        </div>
+        <div class="fs-layer">
+          <div class="ltitle"><h5>Settlement · <em>on-chain</em></h5><span class="num">— 01</span></div>
+          <div class="lbody">x402 / USDC for agent-to-agent, API pricing, sub-dollar flows · custody + compliance as a service</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 13 · RISK & REGULATION                                    -->
+<!-- ============================================================= -->
+<section class="slide paper">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 05 · Future · Risk</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">013 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect" style="color:var(--rust);">— What could go wrong</div>
+      <h2>Fraud, liability and regulation — the <em>hidden tax</em> on the next three years.</h2>
+      <div class="rdate">2026 · 2027 · 2028</div>
+    </div>
+
+    <div class="gaps" style="padding-top:28px;">
+      <div class="gap" style="border-color:var(--rule-paper);color:#1a1a1a;">
+        <div class="n">01</div>
+        <h4 style="color:#1a1a1a;">Agent <em>hijack</em>.</h4>
+        <p style="color:#35342E;">Prompt injection, credential theft, jailbreaks — a class of attack traditional risk engines cannot see.</p>
+        <div class="solv" style="border-color:var(--rule-paper);color:#444;">+450% darkweb mentions · Visa</div>
+      </div>
+      <div class="gap" style="border-color:var(--rule-paper);color:#1a1a1a;">
+        <div class="n">02</div>
+        <h4 style="color:#1a1a1a;">Agents <em>as tools</em>.</h4>
+        <p style="color:#35342E;">Automated card-testing and synthetic identity at machine speed. Bot fraud losses already US$186B per year.</p>
+        <div class="solv" style="border-color:var(--rule-paper);color:#444;">+25% malicious bot tx · Visa</div>
+      </div>
+      <div class="gap" style="border-color:var(--rule-paper);color:#1a1a1a;">
+        <div class="n">03</div>
+        <h4 style="color:#1a1a1a;">Agent <em>error</em>.</h4>
+        <p style="color:#35342E;">Hallucinated purchases, misread intent, wrong size, wrong address. 28% chargeback rate on Buy for Me.</p>
+        <div class="solv" style="border-color:var(--rule-paper);color:#444;">+24% chargeback vol · Datos</div>
+      </div>
+      <div class="gap" style="border-color:var(--rule-paper);color:#1a1a1a;">
+        <div class="n">04</div>
+        <h4 style="color:#1a1a1a;">Agent <em>liability</em>.</h4>
+        <p style="color:#35342E;">Oxford Law Blog: PSR/PSD3 do not yet define whether an agent transaction is "authorized". Whose insurance pays?</p>
+        <div class="solv" style="border-color:var(--rule-paper);color:#444;">MC: "Accountability" as standard</div>
+      </div>
+      <div class="gap" style="border-color:var(--rule-paper);color:#1a1a1a;">
+        <div class="n">05</div>
+        <h4 style="color:#1a1a1a;">The <em>regulatory stack</em>.</h4>
+        <p style="color:#35342E;">EU AI Act · PSD3 · MiCA · DMA — each arrives with teeth in 2026 – 2028. Standards-aligned builders face far less exposure.</p>
+        <div class="solv" style="border-color:var(--rule-paper);color:#444;">2026·H1 first guidance expected</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 14 · AWS — positioning hero                                -->
+<!-- ============================================================= -->
+<section class="slide gradient">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 06 · AWS · Position</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">014 / 017</span></div>
+    </div>
+    <div class="volmark">§ 06 · WHERE AWS FITS — INFRASTRUCTURE, NOT PROTOCOL</div>
+
+    <div class="hed">
+      <div class="sect">— Strategic position</div>
+      <h2></h2>
+      <div class="rdate"></div>
+    </div>
+
+    <div class="aws-hero">
+      <div>
+        <span class="eyebrow">AWS · Infrastructure Role</span>
+        <h2 class="display" style="margin-top:18px;">
+          AWS does <em>not</em><br/>
+          need to win<br/>
+          the <em>protocol war</em>.
+        </h2>
+        <p class="lede">It needs to be the <b style="color:var(--aws);font-style:normal;font-weight:500;">runtime beneath every protocol</b> — the place agents are built, the place merchants stand up MCP endpoints, the place Web Bot Auth is verified, the place Bedrock models reason and Decision Intelligence signals land.</p>
+      </div>
+
+      <div class="right">
+        <div class="tile">
+          <span class="n">— 01</span>
+          <h5>Agent <em>runtime</em></h5>
+          <p>Bedrock · AgentCore Gateway · AgentCore Browser (Web Bot Auth signing · Preview · 2025·10) · Nova + Claude family.</p>
+        </div>
+        <div class="tile">
+          <span class="n">— 02</span>
+          <h5>Merchant <em>enablement</em></h5>
+          <p>OpenAPI → MCP auto-conversion in AgentCore Gateway · Cognito/OAuth · Amazon Pay back-ends for ACP/AP2.</p>
+        </div>
+        <div class="tile">
+          <span class="n">— 03</span>
+          <h5><em>Trust</em> at the edge</h5>
+          <p>AWS WAF Bot Control v4 with Web Bot Auth labels (verified · failed · expired · unknown). CloudFront integration · 2025·11.</p>
+        </div>
+        <div class="tile">
+          <span class="n">— 04</span>
+          <h5>Security &amp; <em>identity</em></h5>
+          <p>Cognito · Verified Permissions · KMS · Secrets Manager · GuardDuty — the primitives every agent deployment needs.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 15 · AWS CAPABILITIES GRID                                -->
+<!-- ============================================================= -->
+<section class="slide">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 06 · AWS · Capabilities</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">015 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— What AWS already ships</div>
+      <h2>Eight AWS primitives the Agentic Commerce stack <em>can run on today</em>.</h2>
+      <div class="rdate">generally available unless marked</div>
+    </div>
+
+    <div class="cap-grid">
+      <div class="cap span2">
+        <div class="glyph">A</div>
+        <h5>Amazon Bedrock <em>AgentCore Gateway</em></h5>
+        <div class="svc">AGENTCORE · GA</div>
+        <p>Upload OpenAPI 3.0 or a Lambda ARN — Gateway auto-converts to MCP tools, wires up OAuth via Cognito, observability and rate-limiting out of the box. The fastest path from an existing merchant API to a Claude/ChatGPT-reachable agent endpoint.</p>
+        <div class="link">→ merchants can be agent-discoverable in a day</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">B</div>
+        <h5>AgentCore <em>Browser</em></h5>
+        <div class="svc">PREVIEW · 2025·10</div>
+        <p>Agent-controlled browser that signs every outbound HTTP request with Web Bot Auth (Ed25519) — the first native WBA-signing runtime.</p>
+        <div class="link">→ browserSigning = True</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">C</div>
+        <h5>AWS <em>WAF</em> · WBA</h5>
+        <div class="svc">BOT CONTROL v4 · 2025·11</div>
+        <p>Four new labels — <i>verified · failed · expired · unknown_bot</i> — let merchants allow good agents while blocking the noise.</p>
+        <div class="link">→ zero-code at the CDN edge</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">D</div>
+        <h5>Bedrock <em>models</em></h5>
+        <div class="svc">NOVA · CLAUDE · TITAN</div>
+        <p>Amazon Nova for low-cost agent reasoning; Anthropic Claude family for complex commerce dialogues; in-region inference for regulated workloads.</p>
+        <div class="link">→ per-token, no idle cost</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">E</div>
+        <h5><em>Cognito</em> + Verified Permissions</h5>
+        <div class="svc">IDENTITY · GA</div>
+        <p>OAuth 2.0 for agent → merchant identity linking; Cedar policies for fine-grained mandate enforcement at the API.</p>
+        <div class="link">→ UCP Identity Linking out of the box</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">F</div>
+        <h5><em>CloudFront</em> + Shield</h5>
+        <div class="svc">EDGE · GA</div>
+        <p>The natural place to verify WBA signatures and enforce per-agent rate limits before they touch origin.</p>
+        <div class="link">→ aligns with Visa TAP edge model</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">G</div>
+        <h5>Amazon <em>Pay</em></h5>
+        <div class="svc">PAYMENT · GA</div>
+        <p>A natural ACP/AP2 payment back-end for merchants already serving Amazon customers — consistent tokenization and dispute flow.</p>
+        <div class="link">→ partner path to AP2 Payment Mandate</div>
+      </div>
+
+      <div class="cap">
+        <div class="glyph">H</div>
+        <h5>Fraud &amp; <em>risk</em></h5>
+        <div class="svc">FRAUD DETECTOR · GUARDDUTY</div>
+        <p>Train agent-specific fraud models on transaction + signature metadata — the shift from behavior biometrics to mandate verification.</p>
+        <div class="link">→ see <i>Fraud &amp; Risk</i> research note</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 16 · FOUR STRATEGIC QUESTIONS                             -->
+<!-- ============================================================= -->
+<section class="slide deep">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 06 · AWS · Four Questions</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">016 / 017</span></div>
+    </div>
+
+    <div class="hed">
+      <div class="sect">— The strategic frame</div>
+      <h2>Four questions every retailer must answer — and <em>what AWS puts on the table</em> for each.</h2>
+      <div class="rdate">AWS Position on Agentic Commerce · 2025·11</div>
+    </div>
+
+    <div class="qfour">
+      <div class="qcard">
+        <div class="num">01</div>
+        <h5>Inbound <em>agent</em> policy.</h5>
+        <p>Which agents may enter your site? How do you measure whether Answer Engines recommend your products?</p>
+        <div class="ans"><b>AWS →</b> WAF WBA labels · AEO with partners · Bot Control v4</div>
+      </div>
+      <div class="qcard">
+        <div class="num">02</div>
+        <h5><em>Checkout</em> strategy.</h5>
+        <p>Do you allow instant checkout <i>inside</i> the Answer Engine? What does that do to margin, ad-attribution, and loyalty?</p>
+        <div class="ans"><b>AWS →</b> AgentCore Gateway · ACP endpoints · Amazon Pay</div>
+      </div>
+      <div class="qcard">
+        <div class="num">03</div>
+        <h5>Outbound <em>agent</em> strategy.</h5>
+        <p>Do you build a Buy-for-Me style agent that transacts on behalf of your customers across adjacent categories?</p>
+        <div class="ans"><b>AWS →</b> Bedrock · Nova Act · AgentCore Browser · MCP</div>
+      </div>
+      <div class="qcard">
+        <div class="num">04</div>
+        <h5><em>On-site</em> agent.</h5>
+        <p>Is there a smart shopping assistant in your app and site — or do Answer Engines steal the customer entirely?</p>
+        <div class="ans"><b>AWS →</b> Bedrock Shopping Agent reference · GenAI Innovation Center</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================= -->
+<!-- SLIDE 17 · CLOSER — call to action                              -->
+<!-- ============================================================= -->
+<section class="slide gradient">
+  <div class="chrome">
+    <div class="meta">
+      <div class="l"><span class="dot"></span><span>§ 07 · What to do Monday</span><span class="rule"></span></div>
+      <div class="r"><span class="pnum">017 / 017</span></div>
+    </div>
+    <div class="volmark">FIN · PREPARED BY AWS · 2026·04·17</div>
+
+    <div class="closer">
+      <div class="quote">
+        <span class="mark">“</span>
+        <h2 class="display">
+          Agentic commerce<br/>
+          will not replace<br/>
+          your payment stack.<br/>
+          <em>It will rebuild<br/>
+          the trust layer<br/>
+          on top of it.</em>
+        </h2>
+        <div class="attr">— AWS · Customer Research · 2026</div>
+      </div>
+
+      <div class="call">
+        <h5>The <em>six-week</em> starter plan — what we propose to our customers.</h5>
+
+        <ul>
+          <li><span class="n">— 01</span><span class="t">Expose one <em>MCP endpoint</em> for your product catalog via AgentCore Gateway.</span><span class="pg">WEEK 1</span></li>
+          <li><span class="n">— 02</span><span class="t">Turn on <em>WAF Bot Control v4</em> with Web Bot Auth labels; stop blocking good agents.</span><span class="pg">WEEK 2</span></li>
+          <li><span class="n">— 03</span><span class="t">Instrument agent traffic — baseline <em>AEO</em> visibility and AI-platform share.</span><span class="pg">WEEK 3</span></li>
+          <li><span class="n">— 04</span><span class="t">Pilot <em>ACP</em> (Stripe) or <em>MC Agent Pay</em>, whichever matches your PSP.</span><span class="pg">WEEK 4</span></li>
+          <li><span class="n">— 05</span><span class="t">Stand up a Bedrock on-site <em>shopping assistant</em> — keep the conversation yours.</span><span class="pg">WEEK 5</span></li>
+          <li><span class="n">— 06</span><span class="t">Write a board-level <em>agent policy</em>: inbound, checkout, outbound, on-site.</span><span class="pg">WEEK 6</span></li>
+        </ul>
+
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-top:10px;padding-top:18px;border-top:1px solid var(--rule);">
+          <div style="font-family:'JetBrains Mono';font-size:10.5px;color:var(--mute);letter-spacing:.18em;line-height:1.8;">
+            <div style="color:var(--aws);">FIN / DOSSIER 001</div>
+            <div>AWS · CUSTOMER RESEARCH</div>
+            <div>2026 · Q2</div>
+          </div>
+          <div class="barcode" style="color:var(--paper-2);">
+            <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

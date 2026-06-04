@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨境支付 · 第一性原理架构图</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1117; --card:#171a23; --border:#252a36; --text:#e6e9ef;
+    --muted:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0b8; --warn:#ffcf6e;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    line-height:1.7;
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:32px 24px 80px}
+  header h1{font-size:28px; margin:0 0 6px}
+  header p{color:var(--muted); margin:0 0 8px}
+  .legend{font-size:13px; color:var(--muted); border:1px solid var(--border);
+    background:var(--card); border-radius:10px; padding:10px 14px; margin:18px 0 8px}
+  .legend b{color:var(--accent2)}
+  section{background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 24px; margin:22px 0}
+  section h2{font-size:20px; margin:0 0 4px; color:var(--accent)}
+  .sub{color:var(--muted); font-size:14px; margin:0 0 16px}
+  .mermaid{background:#0c0e14; border-radius:10px; padding:18px; overflow-x:auto; text-align:center}
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:14px}
+  th,td{border:1px solid var(--border); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:#1d2230; color:var(--accent2)}
+  .key{border-left:3px solid var(--warn); background:#1c1a12; padding:10px 14px;
+    border-radius:0 8px 8px 0; margin-top:14px; font-size:14px}
+  .key b{color:var(--warn)}
+  nav{position:sticky; top:0; background:rgba(15,17,23,.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border); padding:10px 0; margin-bottom:8px; z-index:10}
+  nav a{color:var(--muted); text-decoration:none; font-size:13px; margin-right:16px}
+  nav a:hover{color:var(--accent)}
+  footer{color:var(--muted); font-size:13px; margin-top:30px; text-align:center}
+  code{background:#222736; padding:1px 6px; border-radius:5px; font-size:13px; color:#ffd9a0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>跨境支付 · 第一性原理架构图</h1>
+    <p>从"账本公理"到四套管道的可视化骨架 · 配套《跨境支付学习笔记.md》</p>
+  </header>
+
+  <nav>
+    <a href="#main">① 主线</a>
+    <a href="#compare">② 四管道对比</a>
+    <a href="#wire">③ 代理行电汇</a>
+    <a href="#card">④ 卡组织</a>
+    <a href="#stable">⑤ 稳定币</a>
+    <a href="#cbdc">⑥ CBDC/mBridge</a>
+  </nav>
+
+  <div class="legend">
+    图例：🔧 行业公知机制（教学性） · 📌 已多源核查的一手事实 · ⚠️ 状态/风险告诫
+  </div>
+
+  <!-- ① 主线 -->
+  <section id="main">
+    <h2>① 一条主线：整个领域的骨架</h2>
+    <p class="sub">钱不会移动，移动的只是账本上的数字 → 跨境没有共同账本 → 四套管道是四种答案</p>
+    <div class="mermaid">
+flowchart TD
+    A["🧱 地基公理<br/>钱不会移动，移动的只是账本上的数字<br/>支付 = 在共同信任的账本上改数字"]
+    B["❗ 核心难题<br/>跨境，根本没有同一个账本<br/>中国央行账本 ≠ 美联储账本，币种还不同"]
+    Q1["❶ 如何在两个不相连的账本间接力？<br/>(清算 / 路由)"]
+    Q2["❷ 如何把一种货币的数字换成另一种？<br/>(外汇)"]
+    P1["① 代理行电汇<br/>认了，靠中间银行接力打补丁"]
+    P2["② 卡组织<br/>自建一个封闭的全球网络当账本"]
+    P3["③ 稳定币<br/>造一个对所有人开放的全球账本(私人)"]
+    P4["④ CBDC / mBridge<br/>让央行亲自造共享账本(最硬的钱)"]
+    A --> B --> Q1 & Q2
+    Q1 & Q2 --> P1 & P2 & P3 & P4
+    style A fill:#1f2a44,stroke:#6ea8fe,color:#e6e9ef
+    style B fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    style P1 fill:#1a2230,stroke:#9aa3b2,color:#e6e9ef
+    style P2 fill:#1a2230,stroke:#9aa3b2,color:#e6e9ef
+    style P3 fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    style P4 fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    </div>
+    <div class="key"><b>最高层洞察：</b>四套管道的差别只在两维度——① 账本由谁造（银行/私人/央行）② 记哪种等级的钱（借条/央行货币）。决定谁胜出的往往不是技术，而是信任与权力的分配。</div>
+  </section>
+
+  <!-- ② 对比 -->
+  <section id="compare">
+    <h2>② 四套管道对比总图</h2>
+    <p class="sub">核心中的核心，横向对比</p>
+    <table>
+      <tr><th>管道</th><th>底层账本</th><th>用哪种"钱"</th><th>谁主导</th><th>跨境结算方式</th><th>最大障碍</th></tr>
+      <tr><td>代理行电汇</td><td>多国央行账本，不互通</td><td>商业银行货币(借条)</td><td>银行+SWIFT</td><td>代理行接力+汇率缝合</td><td>慢/贵/不透明(结构性)</td></tr>
+      <tr><td>卡组织</td><td>私人封闭全球网络</td><td>商业银行货币</td><td>Visa/MC/银联</td><td>网络内清算+换汇</td><td>交换费/DCC坑</td></tr>
+      <tr><td>稳定币</td><td>公开区块链(开放)</td><td>私人代币(借条)</td><td>私人公司</td><td>链上转账即结算</td><td>on/off-ramp+监管</td></tr>
+      <tr><td>CBDC/mBridge</td><td>央行共建账本(许可)</td><td><b style="color:var(--accent2)">央行货币(最硬)</b></td><td>多国央行</td><td>共享账本直接结算</td><td>治理/地缘政治</td></tr>
+    </table>
+    <div class="mermaid">
+flowchart LR
+    subgraph 钱的等级["💰 钱的等级（理解CBDC价值的钥匙）"]
+    direction TB
+    H["最硬 · 央行货币<br/>现金/准备金 = 钱本身，不会暴雷"]
+    M["商业银行货币<br/>你的存款 = 银行欠你的借条"]
+    S["最软 · 私人代币<br/>稳定币 = 发行方欠你的借条"]
+    H --> M --> S
+    end
+    style H fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    style M fill:#1a2230,stroke:#9aa3b2,color:#e6e9ef
+    style S fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    </div>
+  </section>
+
+  <!-- ③ 电汇 -->
+  <section id="wire">
+    <h2>③ 代理行电汇：资金如何接力（真实案例）</h2>
+    <p class="sub">深圳工厂收美国 5 万美元货款 · 注意信息流(SWIFT)与资金流(清算系统)是两条轨道</p>
+    <div class="mermaid">
+flowchart TD
+    US["🇺🇸 美国客户<br/>(开户行: 美国某小银行)"]
+    SW{"SWIFT 报文<br/>pacs.008 (原MT103)<br/>📌 只传信息，不搬钱"}
+    CH["CHIPS / Fedwire<br/>📌 美元终极账本<br/>(净额清算 / RTGS)"]
+    CITI["花旗纽约<br/>工行在此有 Nostro 账户"]
+    ICBC["🇨🇳 中国工行<br/>合规KYC/AML + 外汇局申报 + 结汇"]
+    SZ["🏭 深圳工厂账户<br/>到账 ≈ ¥360万 (扣手续费)"]
+    US -- "①发起付款指令" --> SW
+    US -- "②美元清算" --> CH
+    CH --> CITI
+    CITI -- "③账本调整: 小银行-50万, 工行Nostro+50万" --> ICBC
+    SW -. "通知报文" .-> ICBC
+    ICBC -- "④⑤换汇成人民币" --> SZ
+    style SW fill:#1f2a44,stroke:#6ea8fe,color:#e6e9ef
+    style CH fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    </div>
+    <div class="key"><b>三个第一性要点：</b>① 美元始终在美国账本，人民币始终在中国账本，两个账本靠"汇率+代理行记账"缝合；② 信息流(SWIFT)和资金流(CHIPS/Fedwire)分开走；③ 慢和贵就发生在接力、对账、合规、换汇上。<br/>📌 遗留痛点 <b>de-risking</b>：走廊从2011年~13000降到2015年12600，小国被"断网"。</div>
+  </section>
+
+  <!-- ④ 卡组织 -->
+  <section id="card">
+    <h2>④ 卡组织：四方模型 + 支付劈成三段</h2>
+    <p class="sub">东京买 10000 日元手表 · 刷卡是"拉"不是"推"，为解决"先发货后收钱的信任问题"而生</p>
+    <div class="mermaid">
+flowchart LR
+    CardH["👤 持卡人<br/>(你)"]
+    Issuer["发卡行 Issuer<br/>(招商银行)<br/>验真伪+额度，最后向你收款"]
+    Scheme{"卡组织 Scheme<br/>Visa / MC / 银联<br/>🔧 不碰钱，只做网络+清算+换汇"}
+    Acquirer["收单行 Acquirer<br/>(日本某收单行)<br/>给商户收款"]
+    Merchant["🏪 商户<br/>(东京手表店)"]
+    CardH -- "①刷卡(签授权书)" --> Merchant
+    Merchant --> Acquirer
+    Acquirer <-- "授权请求/批准" --> Scheme
+    Scheme <-- "路由到发卡行" --> Issuer
+    Issuer -. "交换费 Interchange(大头~7成)" .-> CardH
+    style Scheme fill:#1f2a44,stroke:#6ea8fe,color:#e6e9ef
+    </div>
+    <div class="mermaid">
+flowchart LR
+    A["① 授权 Authorization<br/>刷卡瞬间(秒)<br/>验真伪+额度，冻结额度<br/>⚠️ 钱没动，只占座"]
+    B["② 清算 Clearing<br/>当晚/次日(批量)<br/>算账+换汇(JPY→CNY)"]
+    C["③ 结算 Settlement<br/>T+1 / T+2<br/>💰 这时才真正划钱"]
+    A --> B --> C
+    style A fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    style C fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    </div>
+    <div class="key"><b>交换费=激励引擎：</b>商户付的MDR分为 交换费(→发卡行,大头)+卡组织费+收单加价。收单侧(商户)付钱补贴发卡侧(银行)，所以银行抢着给你发卡送积分——你的消费就是它的资产。<br/>⚠️ <b>DCC坑：</b>境外刷卡永远选当地货币结算，选人民币会被偷加3%~7%。</div>
+  </section>
+
+  <!-- ⑤ 稳定币 -->
+  <section id="stable">
+    <h2>⑤ 稳定币：重做一个全球开放账本</h2>
+    <p class="sub">中间段是魔法(转账即结算)，但两端的入金/出金口才是真正的瓶颈</p>
+    <div class="mermaid">
+flowchart LR
+    F1["💵 法币(美元)"]
+    On(["① 入金 / 铸币<br/>on-ramp<br/>⚠️ KYC+银行+合规"])
+    C1["链上 USDC"]
+    C2["链上 USDC"]
+    Off(["③ 出金 / 赎回<br/>off-ramp<br/>⚠️ 外汇管制+本地结汇"])
+    F2["💴 法币(人民币)"]
+    F1 --> On --> C1
+    C1 == "② 链上转账(魔法)<br/>几分钟·全球同一账本·转账即结算" ==> C2
+    C2 --> Off --> F2
+    style C1 fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    style C2 fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    style On fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    style Off fill:#3a2520,stroke:#ffcf6e,color:#e6e9ef
+    </div>
+    <div class="key"><b>关键认知：</b>稳定币没有消灭外汇管制/KYC/结汇，只是把它们从"链路中间"推到了"两端的入金/出金口"。中间段确实快了便宜了，但只要最终要落地成法币，两端问题一个都跑不掉。<br/>📌 落地形态="嵌入"非"替代"：Stripe Bridge×Visa(用卡组织网络当off-ramp)、Ripple×Mastercard×WebBank×Gemini(RLUSD结算法币卡交易，待监管批准)。</div>
+  </section>
+
+  <!-- ⑥ CBDC -->
+  <section id="cbdc">
+    <h2>⑥ CBDC / mBridge：央行版的共同账本</h2>
+    <p class="sub">同稳定币思路，但发行人是央行(最硬的钱) · 绕开代理行和美元</p>
+    <div class="mermaid">
+flowchart TD
+    subgraph OLD["传统电汇 (慢/贵/不透明)"]
+    direction LR
+    O1["🇨🇳 中国工行"] -- "代理行接力(花旗等)<br/>美元·Nostro·T+2·多重抽费" --> O2["🇹🇭 泰国银行"]
+    end
+    subgraph NEW["mBridge (📌 已核查·BIS)"]
+    direction LR
+    N1["🇨🇳 中国工行"] == "共享账本直接结算<br/>数字人民币/泰铢·央行货币·数秒·无中间行" ==> N2["🇹🇭 泰国银行"]
+    end
+    OLD -."降维打击".-> NEW
+    style OLD fill:#1a2230,stroke:#9aa3b2,color:#e6e9ef
+    style NEW fill:#142a22,stroke:#7ee0b8,color:#e6e9ef
+    </div>
+    <div class="key">
+      📌 <b>mBridge：</b>多边CBDC共享平台，许可型DLT。创始央行：泰国、阿联酋、中国人民银行数研所、香港金管局 +25观察方。银行直接双边连接，用央行货币数秒结算，绕开代理行与美元/CHIPS/Fedwire。<br/>
+      ⚠️ <b>状态：</b>实验性MVP，BIS已于2024.10退出(后沙特加入)。是"设计意图"非"现实"。<br/>
+      🧠 <b>最深洞察：</b>技术可行≠能落地。一个绕开美元和制裁的体系，最大障碍是<b>治理与地缘政治——谁主导、谁信任</b>。这也解释了为什么又慢又贵的代理行老体系几十年还长青：换掉它的阻力是政治性的。
+    </div>
+  </section>
+
+  <footer>
+    第一性原理学习材料 · 📌=已核查一手事实 🔧=行业公知 ⚠️=告诫 · 撰写于 2026-06-04<br/>
+    配套：跨境支付学习笔记.md（骨架+自测题） / 跨境支付深度研究报告.md（带引用来源）
+  </footer>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad:true,
+    theme:'dark',
+    themeVariables:{ fontSize:'15px', fontFamily:'-apple-system,"PingFang SC",sans-serif' },
+    flowchart:{ curve:'basis', padding:14, useMaxWidth:true }
+  });
+</script>
+</body>
+</html>
