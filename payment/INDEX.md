@@ -45,7 +45,7 @@ payment/
 |---|---|---|
 | `01-cards-business.md` | 📝 模块1·业务 | 银行卡四方模型业务篇：推vs拉支付、四方模型五角色、卡组织解决N×N难题、四方vs三方、授权-清算-结算三段、交换费/MDR激励引擎、发卡(虚拟卡)与收单(KYB/拒付)、双边网络效应护城河。含跨境刷卡案例(Mermaid时序图) |
 | `01-cards-tech-aws.md` | 📝 模块1·技术 | 银行卡技术篇+AWS：ISO 8583报文(MTI/位图/数据域)、卡BIN路由、授权(在线)vs清算(离线)双架构、安全四件套(EMV/3DS/Tokenization/HSM各防一类攻击)、PCI-DSS缩小scope策略。AWS方案:Payment Cryptography/Nitro Enclaves/CloudHSM/KMS/继承PCI-L1 |
-| `01b-acquiring-psp-payfac.md` | 📝 模块1·深化 | 收单产业链拆解：收单行/Processor/ISO/PayFac/PSP的定位/碰钱与否/担风险与否/分润(residual vs markup vs IC++)。**Processor深入**(牌照=碰不碰资金清算/二清红线、中国玩家=持牌自营+软件商供货、三种商业模式License/SaaS/自营、AWS多租户处理平台)。案例(Stripe/Square/Adyen/中国持牌vs聚合)。PayFac平台AWS蓝图。**跨境收款公司=跨境PayFac+换汇** |
+| `01b-acquiring-psp-payfac.md` | 📝 模块1·深化 | 收单产业链拆解(角色视角)：收单行/Processor/ISO/PayFac/PSP的定位/碰钱与否/担风险与否/分润(residual vs markup vs IC++)。**Processor深入**(牌照=碰不碰资金清算/二清红线、中国玩家、三种商业模式、AWS多租户平台)。**收单系统逻辑分层(系统视角)**:网关+处理器+清结算+商户管理+风控,功能层≠主体边界(全栈/分工/独立三种组合)。案例(Stripe/Adyen/连连=跨境PayFac/CardInfoLink=Processor)。PayFac平台AWS蓝图。**跨境收款公司=跨境PayFac+换汇** |
 | `跨境支付深度研究报告.md` | 📝 模块3·报告 | 带引用的完整研究报告：G20 跨境支付路线图（四摩擦四目标、11 量化目标）、各国清算系统（Fedwire/CHIPS/CHAPS/T2/CIPS）、代理行机制、SWIFT 报文与 ISO 20022、新兴技术（Nexus/mBridge/稳定币卡）、中国出海专题，附核查来源清单。📌已核查/🔧公知分级标注 |
 | `跨境支付学习笔记.md` | 📝 笔记 | 第一性原理学习骨架：一条主线（账本公理→无共同账本→四套管道）+ 四套管道对比表 + 三大关键概念（清算vs结算、信息流vs资金流、钱的等级）+ 10 道自测题 |
 | `跨境支付架构图.html` | 🌐 网页 | 6 张 Mermaid 可视化架构图（主线 / 四管道对比 / 代理行电汇资金流 / 卡组织四方模型与三段 / 稳定币接缝 / mBridge），自包含暗色主题网页 |
