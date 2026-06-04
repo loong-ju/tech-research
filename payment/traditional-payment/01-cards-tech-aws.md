@@ -179,7 +179,7 @@ sequenceDiagram
     CS->>CS: 轧差,算各成员行净额
     CS-->>PROC: 下发清算文件(当日全部交易明细)
     PROC->>SPLIT: 按文件做商户清分
-    Note over SPLIT: 总额→各商户:交易额-MDR;<br/>平台型商户再分账给子商户
+    Note over SPLIT: 总额→各商户(交易额-MDR)，<br/>平台型商户再分账给子商户
     SPLIT->>RECON: 清分结果送对账
     CS-->>RECON: 卡组织账单
     RECON->>RECON: 逐笔核对,挂差异(红冲/补单)

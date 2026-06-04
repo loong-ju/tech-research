@@ -430,8 +430,8 @@ sequenceDiagram
     CS->>ISS: 验真伪+额度+风控
     ISS-->>CS: 批准,冻结约¥50人民币额度
     CS-->>POS: 批准,打印小票
-    Note over CS: ② 清算:Visa用网络汇率把JPY换算CNY,算各方净额
-    Note over ACQ,ISS: ③ 结算(T+1/2):招行→Visa→收单行→便利店
+    Note over CS: ② 清算阶段 Visa用网络汇率把JPY换算CNY,算各方净额
+    Note over ACQ,ISS: ③ 结算(T+1/2) 招行→Visa→收单行→便利店
     ISS->>CH: 账单记一笔≈¥50(含汇率),月底还款钱才真流出
 ```
 

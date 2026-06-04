@@ -239,7 +239,7 @@ sequenceDiagram
     CS-->>POS: 返回「批准」★钱未动,仅冻结10元额度
     Note over ACQ,ISS: 【资金流·清算Clearing】当天batch,卡组织算各行净额
     Note over ACQ,ISS: 【资金流·结算Settlement】次日真正划钱,达成finality
-    Note over U,ISS: 【账本】发卡行:借你-10 / 收单行:贷商户(扣手续费) / 各方记手续费分录,借贷全程平衡
+    Note over U,ISS: 【账本】发卡行借你-10 / 收单行贷商户(扣手续费) / 各方记手续费分录,借贷全程平衡
     Note over U,POS: 【信任】互不认识,但都信任银行卡体系 → 交易达成
 ```
 
