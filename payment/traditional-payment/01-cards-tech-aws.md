@@ -84,6 +84,151 @@ sequenceDiagram
 
 业务篇讲了"收单产业链有哪些角色（谁来做）"，这里讲"收单系统由什么构成、怎么连、怎么路由（系统视角）"。
 
+### 4.0 整体架构全景：一张图串起所有角色与组件
+
+先建立全局视图，再逐块下钻。下图把**持卡人、商户、收单系统（网关→网关路由→处理器）、商户清分、风控、清算交互、结算交互**及外部各方放在一起，标出三类数据流。
+
+```mermaid
+flowchart TB
+    CH["持卡人"]
+    M["商户"]
+    subgraph ACQSYS["收单系统(收单机构)"]
+        GW["网关 Gateway<br/>受理入口/加密/协议适配"]
+        ROUTE["网关路由<br/>硬性匹配+择优(least-cost/成功率/failover)"]
+        PROC["处理器 Processor<br/>组8583/对接网络/清算文件"]
+        RISK["风控引擎<br/>实时反欺诈/限额/拒付防控"]
+        SPLIT["商户清分<br/>总额按商户拆分+扣MDR+分账"]
+        SETTLE["结算/Payout<br/>按T+N打款给商户"]
+        MM["商户管理<br/>入网KYB/MID/费率"]
+        RECON["对账<br/>内外账逐笔核对"]
+    end
+    CSORG["卡组织<br/>(网络清算:轧差算各行净额)"]
+    ISS["发卡行<br/>(授权决策/对持卡人记账)"]
+    CB["央行/清算机构<br/>(最终资金结算 finality)"]
+    BANK["商户银行账户"]
+
+    CH -->|刷卡/输卡| M
+    M -->|交易请求| GW
+    GW --> RISK
+    RISK --> ROUTE
+    ROUTE --> PROC
+    PROC <-->|① 授权指令流(在线/同步/ISO8583)| CSORG
+    CSORG <-->|授权路由| ISS
+    CSORG -.->|② 清算文件(批量/T+1)| PROC
+    PROC --> SPLIT
+    CSORG -.->|③ 结算:成员行净额| CB
+    CB -.->|央行货币划拨| SETTLE
+    SPLIT --> SETTLE
+    SETTLE -->|对商户结算| BANK
+    PROC --> RECON
+    SPLIT --> RECON
+    MM -.配置MID/费率.-> ROUTE
+    MM -.商户准入.-> SPLIT
+```
+
+📌 **三类数据流的逻辑关系**（这是架构的灵魂，分别对应下面三张场景图）：
+- **① 指令流（授权）**：在线、同步、秒级。判断"这笔能不能扣"，钱未动。经 网关→风控→路由→处理器→卡组织→发卡行。
+- **② 清算流**：批量、T+1。卡组织下发清算文件，处理器据此做**商户清分**（总额拆到各商户、扣 MDR）。
+- **③ 结算流**：资金真正划转。成员行间经央行达成 finality，收单机构再 Payout 给商户。
+
+> 🎯 **交流要点**：能画出"指令流(在线)与清算/结算流(批量)分离、风控在授权前置、清分在清算之后、结算最后落地"这条主线，说明你掌握了收单系统的骨架。下面 §4.1-4.6 是对这张图各组件的下钻。
+
+### 4.0.1 场景流程图（指令流 / 清算 / 结算 / 拒付）
+
+**场景1：支付指令流（授权，在线同步）**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CH as 持卡人
+    participant M as 商户
+    participant GW as 网关
+    participant RISK as 风控
+    participant RT as 网关路由
+    participant PROC as 处理器
+    participant CS as 卡组织
+    participant ISS as 发卡行
+    CH->>M: 刷卡/输卡
+    M->>GW: 交易请求(加密卡数据)
+    GW->>RISK: 实时风险评分
+    RISK-->>GW: 通过/拦截/加验(3DS)
+    GW->>RT: 读BIN,选通道(硬性匹配+择优)
+    RT->>PROC: 路由到选定通道
+    PROC->>CS: ISO8583 0100授权请求
+    CS->>ISS: 0100
+    ISS->>ISS: 验卡/额度/风控→冻结额度
+    ISS-->>CS: 0110(DE39=00)
+    CS-->>PROC: 0110
+    PROC-->>GW: 授权结果
+    GW-->>M: 成功/失败(★钱未动,仅冻结)
+    Note over CH,ISS: 全程秒级。失败可走failover重试备用通道
+```
+
+**场景2：清算流（批量，T+1，含商户清分）**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as 商户
+    participant PROC as 处理器
+    participant CS as 卡组织
+    participant SPLIT as 商户清分
+    participant RECON as 对账
+    M->>PROC: 日终提交当日交易批次
+    PROC->>CS: 上送清算(0220)
+    CS->>CS: 轧差,算各成员行净额
+    CS-->>PROC: 下发清算文件(当日全部交易明细)
+    PROC->>SPLIT: 按文件做商户清分
+    Note over SPLIT: 总额→各商户:交易额-MDR;<br/>平台型商户再分账给子商户
+    SPLIT->>RECON: 清分结果送对账
+    CS-->>RECON: 卡组织账单
+    RECON->>RECON: 逐笔核对,挂差异(红冲/补单)
+```
+
+**场景3：结算流（资金真正划转,达成finality）**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant ISS as 发卡行
+    participant CS as 卡组织
+    participant CB as 央行/清算机构
+    participant ACQ as 收单机构
+    participant M as 商户
+    CS->>ISS: 通知应付净额(扣交换费)
+    ISS->>CB: 划付净额(央行货币)
+    CB->>ACQ: 成员行间结算,达成finality(不可逆)
+    ACQ->>ACQ: 扣手续费/按清分结果
+    ACQ->>M: Payout打款(T+N到商户账户)
+    Note over ISS,M: 清算只是算账,这里才真正动钱
+```
+
+**场景4：拒付/退单流（Chargeback,逆向资金流)** —— 架构师常忽略但很重要
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant CH as 持卡人
+    participant ISS as 发卡行
+    participant CS as 卡组织
+    participant ACQ as 收单机构
+    participant M as 商户
+    CH->>ISS: 发起争议(未收到货/盗刷)
+    ISS->>CS: 提交拒付
+    CS->>ACQ: 转交拒付,扣回资金
+    ACQ->>M: 要求商户举证/扣回货款
+    alt 商户举证成功
+        M-->>ACQ: 提供凭证 → 资金返还
+    else 举证失败
+        M-->>CH: 资金退回持卡人(商户承担损失)
+    end
+    Note over CH,M: 逆向资金流。3DS可把责任转移给发卡行(业务篇§7.2)
+```
+
+> 💡 **为什么补拒付流**：拒付是收单机构**风险与资损的核心来源**（商户跑路+消费者拒付，损失可能落到收单行），也是风控系统重点防控的对象。架构上它是一条**逆向资金流**，与正向的指令/清算/结算流共同构成收单的完整资金闭环。
+
+---
+
 ### 4.1 收单系统由哪些组件构成
 
 📌 从"收单要完成什么"（受理→处理→清结算）推出组件：
