@@ -112,11 +112,11 @@ flowchart TB
     GW --> RISK
     RISK --> ROUTE
     ROUTE --> PROC
-    PROC <-->|① 授权指令流(在线/同步/ISO8583)| CSORG
+    PROC <-->|"① 授权指令流(在线/同步/ISO8583)"| CSORG
     CSORG <-->|授权路由| ISS
-    CSORG -.->|② 清算文件(批量/T+1)| PROC
+    CSORG -.->|"② 清算文件(批量/T+1)"| PROC
     PROC --> SPLIT
-    CSORG -.->|③ 结算:成员行净额| CB
+    CSORG -.->|"③ 结算 成员行净额"| CB
     CB -.->|央行货币划拨| SETTLE
     SPLIT --> SETTLE
     SETTLE -->|对商户结算| BANK
