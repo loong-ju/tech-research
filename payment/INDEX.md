@@ -43,9 +43,8 @@ payment/
 
 | 文件 | 类型 | 内容摘要 |
 |---|---|---|
-| `01-cards-business.md` | 📝 模块1·业务 | 银行卡四方模型业务篇：推vs拉支付、四方模型五角色、卡组织解决N×N难题、四方vs三方、授权-清算-结算三段、交换费/MDR激励引擎、发卡(虚拟卡)与收单(KYB/拒付)、双边网络效应护城河。含跨境刷卡案例(Mermaid时序图) |
-| `01-cards-tech-aws.md` | 📝 模块1·技术 | 银行卡技术篇+AWS：ISO 8583报文(MTI/位图/数据域)、卡BIN路由、授权(在线)vs清算(离线)双架构、安全四件套(EMV/3DS/Tokenization/HSM各防一类攻击)、PCI-DSS缩小scope策略。AWS方案:Payment Cryptography/Nitro Enclaves/CloudHSM/KMS/继承PCI-L1 |
-| `01b-acquiring-psp-payfac.md` | 📝 模块1·深化 | 收单产业链拆解(角色视角)：收单行/Processor/ISO/PayFac/PSP的定位/碰钱与否/担风险与否/分润(residual vs markup vs IC++)。**Processor深入**(牌照=碰不碰资金清算/二清红线、中国玩家、三种商业模式、AWS多租户平台)。**收单系统逻辑分层(系统视角)**:网关+处理器+清结算+商户管理+风控,功能层≠主体边界。**清结算分层归属**:网络清算(卡组织)/最终资金结算(央行·中国银联网联)/对商户结算(收单机构)/对持卡人记账(发卡行),非单一主体。**各环节交互方式**:Gateway↔Processor用API/Processor↔卡组织用专线8583/Processor↔清结算用文件批量/内部用DB,中美供应商格局对比。**网关路由**:多通道两层次来源(网关聚合层多机构 vs 收单机构内部:一卡多清算网络/Durbin双借记网络/多上游/多MID/主备)+硬性匹配(支付方式/BIN/币种/卡种/金额)+择优(成本least-cost/成功率/容灾failover/负载/商户规则)+规则引擎+AWS。案例(Stripe/Adyen/连连=跨境PayFac/CardInfoLink=Processor)。PayFac平台AWS蓝图。**跨境收款公司=跨境PayFac+换汇** |
+| `01-cards-business.md` | 📝 模块1·业务 | (top-down主线)银行卡四方模型与收单产业链业务篇：①卡支付本质(推vs拉/信任) ②四方模型五角色+N×N+四方vs三方 ③**收单产业链**(收单行/Processor/ISO/PayFac/PSP定位、ISO vs PayFac分水岭、中国二清红线、案例、**跨境收款公司=跨境PayFac+换汇**) ④授权-清算-结算三段 ⑤MDR/交换费/分润(residual/markup/IC++) ⑥发卡(虚拟卡)与收单(KYB/拒付) ⑦双边网络效应护城河。FAQ:MID/内部清算/多通道来源 |
+| `01-cards-tech-aws.md` | 📝 模块1·技术 | (top-down主线)银行卡技术篇+AWS：①ISO 8583(MTI/位图/数据域)+卡BIN路由 ②刷卡时序(授权在线vs清算离线) ③**收单系统逻辑架构**(组件=网关+处理器+清结算+商户管理+风控、网关vs处理器、Processor牌照/三种商业模式/AWS多租户、交互方式API/文件/DB、网关路由硬性匹配+择优least-cost、清结算分层) ④安全四件套(EMV/3DS/Tokenization/HSM各防一类攻击) ⑤PCI-DSS缩scope+密钥AWS(Payment Cryptography/Nitro Enclaves/CloudHSM/KMS/继承PCI-L1) ⑥**PayFac平台AWS架构**(多商户账本/分账/KYB/Payout,直通跨境收款技术底座)。FAQ:Processor牌照/中国玩家/交互方式 |
 | `跨境支付深度研究报告.md` | 📝 模块3·报告 | 带引用的完整研究报告：G20 跨境支付路线图（四摩擦四目标、11 量化目标）、各国清算系统（Fedwire/CHIPS/CHAPS/T2/CIPS）、代理行机制、SWIFT 报文与 ISO 20022、新兴技术（Nexus/mBridge/稳定币卡）、中国出海专题，附核查来源清单。📌已核查/🔧公知分级标注 |
 | `跨境支付学习笔记.md` | 📝 笔记 | 第一性原理学习骨架：一条主线（账本公理→无共同账本→四套管道）+ 四套管道对比表 + 三大关键概念（清算vs结算、信息流vs资金流、钱的等级）+ 10 道自测题 |
 | `跨境支付架构图.html` | 🌐 网页 | 6 张 Mermaid 可视化架构图（主线 / 四管道对比 / 代理行电汇资金流 / 卡组织四方模型与三段 / 稳定币接缝 / mBridge），自包含暗色主题网页 |
