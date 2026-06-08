@@ -136,16 +136,38 @@ def extract_toc(path):
     return '<div class="toc">' + "\n".join(items) + "</div>"
 
 
+# 按学习模块顺序排列目录（而非字母序）：根级总纲 → 模块0 → 1-3 → 4 → 5 → 6 → 参考
+DIR_ORDER = {
+    "_foundation": 0,          # 模块0 地基
+    "traditional-payment": 1,  # 模块1-3 传统/卡/电子/跨境
+    "stable-coin": 4,          # 模块4 稳定币
+    "agentic-payment": 5,      # 模块5 Agentic
+    "_topics": 6,              # 模块6 横向专题
+    "reference": 9,            # 参考素材
+}
+# 根级文档的优先顺序（总纲类排最前）
+ROOT_FILE_ORDER = {
+    "INDEX.md": 0, "学习路径总纲.md": 1, "支付概念全景地图.md": 2,
+    "支付范式资金流对比.md": 3, "CLAUDE.md": 4,
+}
+
+
 def build_tree(active_rel=""):
-    """左侧目录树：文档级 + 当前文档展开章节(二级导航)。"""
+    """左侧目录树：按学习模块顺序排列；当前文档展开章节(二级导航)。"""
     lines = []
     def walk(d, depth, rel):
         try:
-            entries = sorted(os.listdir(d))
+            entries = os.listdir(d)
         except OSError:
             return
         dirs = [e for e in entries if os.path.isdir(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
         files = [e for e in entries if os.path.isfile(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
+        # 目录按学习模块顺序；文件：根级按总纲优先序+名字，子目录内按名字(编号01/02..自然有序)
+        dirs.sort(key=lambda e: (DIR_ORDER.get(e, 8), e))
+        if depth == 0:
+            files.sort(key=lambda e: (ROOT_FILE_ORDER.get(e, 5), e))
+        else:
+            files.sort()
         for e in files:
             if not (e.endswith(".md") or e.endswith(".html")):
                 continue
