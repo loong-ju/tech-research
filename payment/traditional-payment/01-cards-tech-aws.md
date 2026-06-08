@@ -814,6 +814,8 @@ flowchart TB
 
 > 🎯 **交流杀手锏**：支付公司自建 HSM 集群成本高、运维痛、扩容难。你能给出 **Payment Cryptography(免自建HSM)+Nitro Enclaves(隔离卡数据)+KMS(密钥)+继承AWS PCI-DSS L1** 的成体系方案，直击其最大痛点。这是 AWS SA 在支付领域最有说服力的切入点。
 
+> 📖 **深入**：CloudHSM 与 Payment Cryptography 在收单/发卡的**具体应用场景、密钥层级、Control/Data Plane API、PIN翻译/PIN验证/CVV/EMV 的真实调用链实例**，见深化文档 **`01c-hsm-payment-cryptography.md`**。
+
 ---
 
 ## 7. PayFac 平台型架构与 AWS
