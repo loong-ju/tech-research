@@ -75,9 +75,11 @@ payment/
 
 | 文件 | 类型 | 内容摘要 |
 |---|---|---|
-| `stablecoin_research.md` | 📝 研究 | 稳定币综合研究 |
-| `stablecoin_cross_border_compliance.md` | 📝 研究 | 稳定币跨境支付的合规问题 |
-| `LEARNING_NOTES_小白到架构师.md` | 📝 笔记 | 稳定币学习笔记（小白到架构师路径） |
+| `04-stablecoin-business.md` | 📝 模块4·业务 | (top-down教学整合)稳定币业务篇：①对账本公理的挑战(造全球开放账本)=链上账本+法币1:1锚定 ②三种锚定(法币储备型主流/超额抵押DAI/算法型UST已暴雷) ③核心价值=转账即结算(消灭代理行接力+清结算时滞) ④**on/off-ramp才是真瓶颈**(没消灭外汇/KYC,只是推到两端) ⑤落地=嵌入非替代(Stripe Bridge×Visa/Ripple×MC/x402,卡网络vs稳定币双轨) ⑥商业模式=储备利息(浮存极致)。中国:人民币换汇合规不可行 |
+| `04-stablecoin-tech-aws.md` | 📝 模块4·技术 | (top-down)稳定币技术篇+AWS：①链上账本vs传统(记账本质同,信任从中心机构→密码学共识) ②**钱包/私钥=命根子**(私钥即所有权,丢=永久丢)+AWS私钥保护(**Nitro Enclaves隔离签名,私钥不出enclave**+KMS/CloudHSM+MPC) ③智能合约mint/burn=on-off ramp链上动作+链上转账流程(签名→共识→写区块即结算) ④Travel Rule+链上分析。AWS:Nitro(私钥)+Managed Blockchain(节点)+Glue/Neptune(链上分析)+网关(ramp)+Aurora(储备对账) |
+| `stablecoin_research.md` | 📝 深度参考 | 稳定币综合研究(机制/储备/监管/对比/x402衔接,带核实来源) |
+| `stablecoin_cross_border_compliance.md` | 📝 深度参考 | 稳定币跨境换汇合规(人民币/东南亚:每跳谁持牌、香港/新加坡通道) |
+| `LEARNING_NOTES_小白到架构师.md` | 📝 笔记 | 稳定币六站学习链(区块链→私钥→稳定币→结算→跨境→x402)+自检清单 |
 
 ---
 
