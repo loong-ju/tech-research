@@ -421,6 +421,67 @@ flowchart TB
 > 🎯 **交流要点**：能讲"注入的是 IPEK 不是 BDK、RKL=TR-34 用在终端、SoftPOS 靠 MPoC 的云端密钥+TEE+监控补偿无安全芯片"——是支付终端安全的硬核认知。
 > ⚠️ **可信度**：BDK 注入(KIF/RKL)、SoftPOS(MPoC/SPoC/TEE) 属支付终端安全专业领域，此处为行业通行机制（🔧 公知级）；落地以 PCI PTS/MPoC 标准最新版与终端厂商方案为准。
 
+#### 2.7.1 SoftPOS 深入：软件保护怎么做 + TEE/SE + 安卓 vs iOS
+
+⚠️ **先破一个常见误解**：Apple Pay 有 Secure Enclave，不等于 SoftPOS 能在端上存 PIN 密钥——**它们是相反两端**：
+
+```mermaid
+flowchart TB
+    Q["手机安全硬件用在两个相反场景"] --> A["Apple Pay=付款端(持卡人侧)<br/>SE存'自己卡的token(DPAN)',卡片数字化(模块1)<br/>成熟"]
+    Q --> B["SoftPOS=受理端(商户侧)<br/>处理'陌生人的卡+PIN',PCI PIN高要求<br/>更难"]
+```
+
+> 普通手机的 TEE/SE 安全等级**够 Apple Pay(护自己的卡token)，但不被认为达到'受理方处理陌生人 PIN'的 PCI PTS 等级**。所以 SoftPOS 核心原则=**尽量不在普通手机端长期存 PIN 处理密钥**，PIN 加密后送云端后端 HSM。
+
+**① 软件保护怎么做**（无硬件信任根时，软件在敌对环境自保）：
+
+```mermaid
+flowchart TB
+    HOSTILE["普通手机=敌对环境(可能root/恶意软件/调试)"] --> SP["软件保护五件套"]
+    SP --> A1["白盒密码:密钥融进算法代码,内存无完整明文密钥"]
+    SP --> A2["代码混淆:控制流扁平化/反编译对抗"]
+    SP --> A3["完整性自校验:代码被改就拒运行/上报"]
+    SP --> A4["RASP环境检测:测root/调试器/Hook(Frida)/模拟器"]
+    SP --> A5["密钥短时效+频繁轮换:泄露窗口极短"]
+```
+
+| 技术 | 怎么做 | 解决 |
+|---|---|---|
+| 白盒密码(White-box) | 密钥打散融进算法,内存永不出现完整明文密钥 | dump 内存也提不出可用密钥 |
+| 代码混淆 | 控制流扁平化/字符串加密 | 逆向极难极慢 |
+| 完整性校验 | App 自校验代码哈希 | 防篡改植后门 |
+| RASP 环境检测 | 检测 root/越狱/调试器/Hook框架/模拟器 | 不安全环境拒绝处理敏感操作 |
+| 密钥短时效 | 密钥只活几分钟/几笔,从后端频繁换 | 泄露窗口极短 |
+
+> 📌 核心思想:软件保护不是"绝对安全"(敌对环境无绝对安全),而是**把攻击成本拉到远高于收益+缩短泄露窗口+配合后端监控止损**。
+
+**② 怎么利用 TEE/SE**（把最敏感操作下沉到硬件隔离区）：
+
+```mermaid
+flowchart TB
+    APP["普通App区(Rich OS,不可信)"] -->|敏感操作下沉| TEE["TEE可信执行环境(CPU隔离区,如TrustZone)"]
+    TEE --> T1["短时会话密钥生成/使用"]
+    TEE --> T2["设备attestation(证明跑在真实未篡改TEE)"]
+    TEE --> T3["敏感数据在受控环境处理"]
+    SE["SE安全元件(独立芯片,更强,类小型HSM)"] -.可选增强.-> T4["密钥存储/运算"]
+```
+
+- **TEE**(Trusted Execution Environment)=CPU 里和主 OS 隔离的执行区(ARM TrustZone)，主 OS 即使 root 也访问不到。
+- **SE**(Secure Element)=独立安全芯片，安全等级比 TEE 更高。
+- ⚠️ SoftPOS 里 TEE/SE 是**辅助增强**(短时密钥/attestation)，PIN 处理最终仍倾向后端 HSM——**不等同传统 POS 安全芯片**。
+
+**③ 安卓 vs iOS：差异很大**：
+
+| 维度 | Android | iOS |
+|---|---|---|
+| 生态 | 碎片化(多厂商,TEE实现各异:高通QSEE/三星Knox..) | 统一(Apple一家) |
+| 安全硬件 | TEE(TrustZone)+StrongBox/Keystore,水位参差 | Secure Enclave,一致且高 |
+| NFC受理 | **开放,可读卡→主流SoftPOS多在安卓** | 长期封闭,靠Apple自己的**Tap to Pay on iPhone**(2022+) |
+| 挑战 | 碎片化→适配各厂商TEE,安全检测复杂 | 封闭→受理能力受Apple控制,走其框架 |
+
+> 🎯 **交流要点**：能讲"白盒密码+RASP+TEE下沉+后端监控补偿无硬件信任根"、"Apple Pay付款端 vs SoftPOS受理端是相反场景"、"SoftPOS主流在安卓(开放可读NFC但碎片化),iOS靠Apple Tap to Pay(封闭统一)"——是 SoftPOS 真实安全工程的硬核认知，避免"手机有TEE就万事大吉"的误解。
+> ⚠️ **可信度**：白盒/RASP/TEE-SE/安卓iOS差异为移动安全通用机制(🔧公知级);PCI MPoC 对各项的强制要求/密钥时效/attestation细节以标准原文为准,未逐项核实。
+
 ### 2.8 实务：ZPK 怎么在收单机构↔发卡行之间约定与交换
 
 §2 列了密钥类型和交换标准，但有个高频实务问题：**ZPK（两机构间的 PIN 密钥）双方到底怎么"约定"出来的？** 答案揭示了密钥分层在落地时的完整链条。
