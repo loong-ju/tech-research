@@ -85,9 +85,11 @@ payment/
 
 ## 🤖 维度三：agentic-payment（智能体支付）
 
-### 综述与专题
+### 模块5 教学篇 + 综述与专题
 | 文件 | 类型 | 内容摘要 |
 |---|---|---|
+| `05-agentic-payment-business.md` | 📝 模块5·业务 | (top-down整合骨架)Agentic Payment业务篇：①核心=只改了"人在场确认"这一件事(付款人不在场→重建授权可验证性) ②新问题(授权传递/Agent身份KYA/可验证凭证/争议归责/幻觉) ③**四层协议栈**(交互MCP-A2A/商业流程UCP-ACP/支付层卡网络-稳定币双轨/信任层KYA-VC) ④玩家格局(Google UCP-AP2/OpenAI-Stripe ACP/Visa TAP/MC Agent Pay/Coinbase x402/Amazon) ⑤双轨(卡vs稳定币) ⑥新护城河=标准话语权+信任层+Agent入口。多指向各协议专题 |
+| `05-agentic-payment-tech-aws.md` | 📝 模块5·技术 | (top-down)Agentic Payment技术篇+AWS：①**授权可验证**(把人在场确认变机器凭证:Mandate/VC/Shared Payment Token,人签名→Agent持→验证方验签查限额) ②MCP/A2A通信 ③**x402微支付**(HTTP402原生,稳定币结算,机器对机器) ④**AgentCore Payments**(Preview,Coinbase链上+Stripe链下双轨,支出治理四要素) ⑤Self-build栈(AgentCore+Outgoing边界CloudFront/Lambda@Edge/x402 Facilitator+Guardrails+AP2 Mandate+Nitro私钥) ⑥Agent风控新威胁(幻觉/Prompt注入/身份伪造) |
 | `agentic_commerce.md` | 📝 综述 | **Agentic Commerce 总览**（篇幅最大）：问题定义、发展历程、核心术语、七大方案深度解读、协议对比分析 |
 | `agentcore-payment.md` | 📝 简报 | 会前 Brief — 与连连支付首席架构师的沟通要点（AWS AgentCore / Kiro / AgentCore Payments 的生产级难点） |
 
