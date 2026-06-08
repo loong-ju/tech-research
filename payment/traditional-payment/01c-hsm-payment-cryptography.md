@@ -140,6 +140,62 @@ flowchart TB
 
 > 🎯 **交流要点**：能讲清"TR-34 首次建信（非对称）→ TR-31 日常传密钥（对称，带用途绑定防混淆）→ DUKPT 终端一次一密（KSN 派生，泄露不扩散）"这三件套，并说出各自解决的攻击场景（用途混淆/首次无信任/终端密钥泄露），是支付密码学的硬核功底。和支付公司聊 HSM/密钥管理，这是能立刻建立专业信任的话题。
 
+### 2.4 实务：ZPK 怎么在收单机构↔发卡行之间约定与交换
+
+§2 列了密钥类型和交换标准，但有个高频实务问题：**ZPK（两机构间的 PIN 密钥）双方到底怎么"约定"出来的？** 答案揭示了密钥分层在落地时的完整链条。
+
+📌 **核心：ZPK 不是直接约定的，而是用上一层 ZMK 加密后传输的**。
+
+📌 **关键概念 ZMK（Zone Master Key，区域主密钥）= 两机构之间的 KEK**：
+> "zone（区域）"指"收单机构↔发卡行这一对关系"。ZMK 是这对关系的"信任根"，专门用来加密保护在它们之间传输的工作密钥（ZPK 等）。**先有 ZMK，才能安全传 ZPK。**
+
+**三级密钥分发链**：
+
+```mermaid
+flowchart TB
+    A["①建立共享 ZMK(区域主密钥)<br/>方式:人工密钥仪式 或 TR-34非对称交换"] --> B["②用 ZMK 加密 ZPK,以 TR-31 密钥块传输"]
+    B --> C["③双方 HSM 内各自解出同一把 ZPK<br/>(明文 ZPK 从不出 HSM)"]
+    C --> D["④日常用 ZPK 加密/翻译 PIN Block"]
+```
+
+#### 第一把 ZMK 怎么来？——两条路
+
+```mermaid
+flowchart TB
+    Q["两机构怎么建立第一把共享 ZMK?"] --> M1["传统:人工密钥仪式 Key Ceremony"]
+    Q --> M2["现代:TR-34 非对称交换(见§2.2)"]
+    M1 --> M1D["双方各派密钥保管人,各持ZMK的一个分量<br/>到各自HSM分别录入,HSM内XOR合成完整ZMK<br/>任何单人都不知道完整密钥"]
+    M2 --> M2D["RSA公钥加密保机密+私钥签名保来源<br/>自动完成首次密钥交换,免人工现场"]
+```
+
+📌 **人工密钥仪式（Key Ceremony）—— 至今仍在用的经典方式**：
+- **密钥分量（Key Component）**：把 ZMK 拆成 2~3 个分量，每个分量由一个独立的**密钥保管人（Key Custodian）**保管（密封信封/智能卡）。
+- **双重控制 + 知识分割（Dual Control + Split Knowledge）**：**任何单独一人都不知道完整密钥**，必须多名保管人同时在场，各自录入自己的分量，HSM 在硬件内 **XOR 合成**出完整 ZMK——合成全程在 HSM 内，无人见到完整明文。
+- 收单机构和发卡行**按约定的同一组分量**在各自 HSM 录入，于是双方 HSM 里有了**同一把 ZMK**。
+- 💡 这就是银行"密钥仪式"的由来：几人锁在房间、双人监督、签字留痕地导入密钥。
+
+#### 完整交换流程
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant ACQ as 收单机构
+    participant ISS as 发卡行
+    Note over ACQ,ISS: 第一步:建立共享 ZMK
+    ACQ->>ISS: 人工密钥仪式(双方保管人各录分量XOR合成) 或 TR-34非对称交换
+    Note over ACQ,ISS: 双方 HSM 内现在有同一把 ZMK(明文从不出HSM)
+    Note over ACQ,ISS: 第二步:用 ZMK 分发 ZPK
+    ACQ->>ISS: 用ZMK加密ZPK,打包成TR-31密钥块传输
+    Note over ACQ,ISS: 双方 HSM 内各自解出同一把 ZPK
+    Note over ACQ,ISS: 第三步:日常用 ZPK
+    ACQ->>ISS: PIN Block用ZPK加密/翻译传输(明文PIN与明文ZPK都不出HSM)
+```
+
+> 📌 **一句话**：ZPK 用上一层 **ZMK 加密**、以 **TR-31** 格式传输；ZMK（第一把共享密钥）通过**人工密钥仪式（双重控制+分量XOR）或 TR-34** 建立。全程明文密钥和明文 PIN 都不出 HSM。
+>
+> 🎯 **交流要点**：能讲"ZMK 先建（仪式/TR-34）→ ZPK 用 ZMK 包着 TR-31 传 → ZPK 日常加密 PIN"这条三级分发链，并知道"密钥仪式=双重控制+知识分割"，是支付密钥管理的实务核心——银行密钥管理团队日常就干这个。
+> ☁️ **AWS 视角**：Payment Cryptography 用 TR-34（`GetParametersForImport`+`ImportKey`）做首次密钥导入，替代传统人工密钥仪式；后续工作密钥用 TR-31 导入——把"几个人飞到现场录密钥"变成 API 调用，这是它对支付公司密钥管理的重要简化。
+
 ---
 
 ## 3. CloudHSM vs Payment Cryptography：怎么选
