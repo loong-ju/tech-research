@@ -36,6 +36,14 @@ payment/
 | `_foundation/00-foundation-business.md` | 📝 地基·业务 | 模块0 业务篇：钱的本质（账本数字+信用）、货币三大功能、货币等级（央行/银行/私人货币）、复式记账、账户体系、清算vs结算（finality）、三流分离（商流/信息流/资金流）、信任中介演进。含综合案例与"与支付公司交流要点" |
 | `_foundation/00-foundation-tech.md` | 📝 地基·技术 | 模块0 技术篇：账本工程模型（append-only流水+派生余额）、CP取舍（金融为何偏执一致性）、幂等（第一信条）、对账（免疫系统）、HSM密钥安全、金融级NFR。每项映射AWS服务（Aurora/QLDB/DynamoDB/CloudHSM/Payment Cryptography/Nitro Enclaves/Glue等） |
 
+### 模块6 横向专题（_topics/，贯穿所有模块）
+| 文件 | 类型 | 内容摘要 |
+|---|---|---|
+| `_topics/61-risk-fraud.md` | 📝 6.1风控 | 风控反欺诈：防三类损失(欺诈/拒付/合规)、三层贯穿(准入/实时/离线)、**技术三代叠加**(规则引擎→ML XGBoost单点→GNN团伙)、XGBoost+GNN互补、Agent时代新威胁。AWS:Fraud Detector+ElastiCache+OpenSearch+SageMaker+Neptune+Guardrails |
+| `_topics/62-compliance.md` | 📝 6.2合规 | 合规体系：三目标(反匿名KYC/KYB/KYA+阻断非法资金AML/制裁/CFT+保护数据PCI/驻留/隐私)、制裁筛查模糊匹配、AML拆分监测、Travel Rule、牌照地图。AWS:Textract+Bedrock(KYB)/OpenSearch(制裁)/SageMaker+Neptune(AML)/Region(驻留) |
+| `_topics/63-ledger-reconciliation.md` | 📝 6.3账务对账 | 账务=支付心脏：复式记账(借贷恒等+append-only红冲)、多账户/清分/多币种(整数防浮点)、对账免疫系统(内部/外部/差错挂账红冲补单)、清算清分账务层统一。AWS:Aurora(强一致)+DynamoDB(幂等)+S3/Glue/Athena(批量对账)+Step Functions |
+| `_topics/64-non-functional.md` | 📝 6.4非功能性 | 支付NFR(AWS主场)：CP信仰(正确性>可用性,分层)、六大NFR、幂等第一信条、分布式事务Saga(预扣-确认-补偿)+对账兜底、削峰扛峰、在线vs离线双架构。AWS:Aurora+DynamoDB+SQS+Step Functions+多AZ+CloudTrail |
+
 **统一浏览**：`python3 _mdserver.py` → http://127.0.0.1:8911（左侧目录树导航，md 自动渲染含 Mermaid 图）
 
 ---
