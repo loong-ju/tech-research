@@ -41,15 +41,16 @@ flowchart TB
 ```
 
 📌 **关键密钥类型**（Payment Cryptography 都支持）：
-| 密钥 | 全称 | 用途 |
-|---|---|---|
-| **KEK** | Key Encryption Key | 密钥加密密钥——保护其他密钥的传输与存储 |
-| **PEK / ZPK** | PIN Encryption Key / Zone PIN Key | 加密 PIN 块（节点间传 PIN 用） |
-| **PVK** | PIN Verification Key | 生成/校验 PIN 验证值（PVV） |
-| **BDK** | Base Derivation Key | DUKPT 体系的根密钥（POS/ATM 终端） |
-| **CVK** | Card Verification Key | 生成/校验 CVV/CVV2/iCVV |
-| **EMV Master Key** | — | 验证芯片卡 ARQC、生成 ARPC |
-| **MAC Key** | — | 报文认证码（防篡改） |
+
+| 密钥 | 全称 | 用途 | 业务场景解释 |
+|---|---|---|---|
+| **KEK** | Key Encryption Key | 保护其他密钥的传输与存储 | 你要把一把 PIN 密钥从总行发到分行/从收单机构发给发卡行，明文密钥绝不能裸传——用 KEK 把工作密钥"包起来"加密传输。它是密钥分层的"中间管理层"，本身不直接参与交易运算，只负责"锁住别的密钥"。 |
+| **PEK / ZPK** | PIN Encryption Key / Zone PIN Key | 加密 PIN 块（节点间传 PIN 用） | 持卡人在 ATM/POS 输入 PIN，PIN 不能明文在网络上传。PEK/ZPK 把 PIN 加密成"PIN Block"。ZPK 特指**两个机构（zone）之间**约定的 PIN 密钥——收单机构和发卡行之间传 PIN 就用双方约定的 ZPK。PIN 翻译（§5）就是把 PIN Block 从一把 ZPK 换成另一把 ZPK。 |
+| **PVK** | PIN Verification Key | 生成/校验 PIN 验证值（PVV） | 发卡行**不存明文 PIN**，而是用 PVK 把 PIN+卡号算出一个 **PVV（验证值）**存起来。用户每次输 PIN，发卡行用 PVK 重新算一遍 PVV 比对——对得上就是 PIN 正确。这样数据库泄露也拿不到明文 PIN。发卡行专用。 |
+| **BDK** | Base Derivation Key | DUKPT 体系的根密钥（POS/ATM 终端） | 一台 POS 机要做到"每笔交易用不同密钥"（一次一密，防截获），靠的是 BDK。BDK 是收单机构持有的"母密钥"，给每台终端注入一个由 BDK 派生的初始密钥；终端每笔交易再用 KSN（计数器）派生唯一密钥。**即使某笔交易密钥泄露，也推不出 BDK 和其他交易密钥**。收单/终端体系核心。 |
+| **CVK** | Card Verification Key | 生成/校验 CVV/CVV2/iCVV | 发卡时用 CVK 根据卡号+有效期算出卡背面的 **CVV2**（那三位数）；交易时用户输入 CVV2，发卡行用 CVK 实时校验。⚠️ CVV2 本身不可存储（PCI 红线），靠 CVK 实时算。iCVV 是芯片卡里的版本。发卡行/3DS 服务商用。 |
+| **EMV Master Key** | EMV Issuer Master Key | 验证芯片卡 ARQC、生成 ARPC | 芯片卡每笔交易生成动态密文 ARQC（证明"我是真卡"）。发卡行用 EMV 主密钥派生出"卡级密钥→会话密钥"来验证 ARQC，并生成 ARPC（证明"我是真发卡行"）回给卡。这是芯片卡**双向防伪、防复制**的根。发卡行专用，一张卡一套派生密钥。 |
+| **MAC Key** | Message Authentication Code Key | 报文认证码（防篡改） | 收单/发卡/卡组织之间传的授权报文（如 ISO 8583），怕被中途篡改金额或卡号。发送方用 MAC Key 给报文算一个"指纹"（MAC）附在报文后，接收方用同样的 MAC Key 重算比对——不一致说明被篡改。保证报文**完整性与来源真实性**，各节点间都用。 |
 
 📌 **密钥交换标准**（密钥怎么在机构间安全传递，明文密钥绝不裸传）：
 - **TR-31**：对称密钥块格式——已建立信任的双方间安全传输密钥，**密钥块自带"用途绑定"**（这把密钥只能干什么，防滥用）。
