@@ -18,6 +18,7 @@ payment/
 ├── _mdserver.py               Web 浏览服务（左侧全局导航 + Markdown/Mermaid 渲染）
 ├── _foundation/               模块0：地基（钱/账本/清结算）— 业务轨×技术轨
 ├── _topics/                   模块6：横向专题（风控/合规/账务/非功能性）
+├── reference/                  参考素材（PPTX大文件不入git；summary/ 文字总结入git）
 ├── traditional-payment/       维度一：传统/跨境支付（模块1-3）
 ├── stable-coin/               维度二：稳定币（模块4）
 └── agentic-payment/           维度三：智能体支付（模块5）
@@ -36,6 +37,20 @@ payment/
 | `_foundation/00-foundation-tech.md` | 📝 地基·技术 | 模块0 技术篇：账本工程模型（append-only流水+派生余额）、CP取舍（金融为何偏执一致性）、幂等（第一信条）、对账（免疫系统）、HSM密钥安全、金融级NFR。每项映射AWS服务（Aurora/QLDB/DynamoDB/CloudHSM/Payment Cryptography/Nitro Enclaves/Glue等） |
 
 **统一浏览**：`python3 _mdserver.py` → http://127.0.0.1:8911（左侧目录树导航，md 自动渲染含 Mermaid 图）
+
+---
+
+## 📚 参考材料总结（reference/summary/）
+
+> 4 份 PPTX 演示文稿的内容总结（原始 PPTX 大文件不入 git，文字总结入 git）。主题：支付 × Agentic AI / Agentic Commerce。**对模块4(稳定币)、模块5(Agentic Payment)、模块6(风控)的研究是一手参考。**
+
+| 文件 | 类型 | 内容摘要 |
+|---|---|---|
+| `reference/summary/README_参考材料概要.md` | 📝 概要 | **先读这份**：4份材料速览+跨材料6大主题（Agentic本质转变/四层协议栈/玩家格局/AWS能力栈/落地方法论/真实ROI）+对本项目各模块的衔接 |
+| `reference/summary/Payment_Agentic_AI_总结.md` | 📝 逐页 | AWS FSI售前方法论(16页)：支付13大Workload全景、三分类切片(Common/提效/业务)、价值金字塔、AgentCore Payments双轨(Coinbase链上+Stripe链下)、Self-build标准栈、进场决策树、7类角色镜头 |
+| `reference/summary/Agentic_AI_on_payment_总结.md` | 📝 逐页 | iPaylinks×AWS单客户落地(93页)：6大改造机会、Top5 AWS支付案例、20+场景方案(KYB/反欺诈XGBoost+GNN/支付路由/Chargeback/B2B虚拟卡/Visa A2A/Stripe ACP)、demo话术答疑、2个PoC、安全合规 |
+| `reference/summary/Agentic_Commerce_Overview_总结.md` | 📝 逐页 | Agentic Commerce协议全景(20页)：四层协议栈(MCP/A2A→UCP/ACP→卡网络+稳定币双轨→信任层)、市场$3-5T、玩家格局(Stripe全赛道/Visa信任层/MC收购BVNK)、标准收敛趋势 |
+| `reference/summary/AgenticPayment_介绍_总结.md` | 📝 逐页 | Agentic Payment安全与协议(31页)：核心论点"付款人不在场问题"、TAP/AP2/VCN/Network Token/x402协议、AWS两条资金轨(AgentCore Payments+Agenzo)、可验证可限额可撤销凭证 |
 
 ---
 
