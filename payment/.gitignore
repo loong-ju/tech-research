@@ -1,0 +1,15 @@
+# 大体积二进制素材不纳入版本控制（GitHub 单文件上限 100MB）
+# 这些文件保留在本地磁盘，仅作参考素材
+reference/
+
+# 大体积演示/文档文件
+*.pptx
+*.ppt
+*.pdf
+*.docx
+*.doc
+
+# 系统/缓存
+.DS_Store
+.playwright-mcp/
+__pycache__/
