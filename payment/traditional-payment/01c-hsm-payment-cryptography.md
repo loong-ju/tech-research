@@ -5,7 +5,7 @@
 > **前置**：模块1技术篇 `01-cards-tech-aws.md` §5-6（安全四件套、PCI-DSS）
 > **组织方式**：top-down 主线。零散追问见文末 FAQ。
 > 标注：🔧 通用技术 · ☁️ AWS · 📌 关键定义 · ⚠️ 坑点 · 🎯 交流要点
-> ⚠️ **可信度**：本文的 AWS API 名称、密钥类型、合规级别经 AWS 官方文档核实（2026-06）；具体请求/响应参数以 [Payment Cryptography API Reference](https://docs.aws.amazon.com/payment-cryptography/) 为准。
+> ⚠️ **可信度**：本文的 AWS API 名称、密钥类型、合规级别经 AWS 官方文档核实（2026-06）；§2.2 的 TR-34 导入流程经 **AWS 官方 sample 代码核对**（[samples-for-payment-cryptography-service](https://github.com/aws-samples/samples-for-payment-cryptography-service)，`key-import-export/tr34`）；具体参数以 [Payment Cryptography API Reference](https://docs.aws.amazon.com/payment-cryptography/) 为准。
 
 ---
 
@@ -85,30 +85,41 @@ flowchart LR
 📌 **解决什么问题**：
 > TR-31 要求双方**已经共享 KEK**。但"第一把 KEK 本身怎么传"？过去靠**人工密钥仪式**——多个保管人各持一份密钥分量，飞到现场、在 HSM 前手工录入合成（成本高、易出错、慢）。TR-34 用非对称密码学把这个"首次建信"自动化、安全化。
 
-📌 **怎么做（TR-34 流程）**：
+📌 **两个角色**（TR-34 术语）：
+- **KDH（Key Distribution Host，密钥分发主机）**：要把密钥**发出去**的一方（如客户的本地 HSM）。
+- **KRD（Key Receiving Device，密钥接收设备）**：**接收**密钥的一方（导入到 AWS 时，**AWS Payment Cryptography 就是 KRD**）。
+
+📌 **怎么做（基于 AWS sample 真实代码的 TR-34 导入流程）**：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant KDH as 发送方 KDH(密钥分发主机)
-    participant KRD as 接收方 KRD(密钥接收设备)
-    KRD->>KDH: ①提供自己的 RSA 公钥(带证书,证明身份)
-    KDH->>KDH: ②生成要传的密钥(如KEK)<br/>用KRD的公钥加密(只有KRD私钥能解)
-    KDH->>KDH: ③用自己私钥签名(证明来自真KDH,防伪造)
-    KDH->>KRD: ④发送:公钥加密的密钥+KDH签名
-    KRD->>KRD: ⑤验KDH签名(确认来源)→用自己私钥解密得到密钥
-    Note over KDH,KRD: 公钥加密保机密(只有KRD能解),签名保来源(确认是真KDH)
+    participant KDH as KDH 客户侧(本地HSM,发送方)
+    participant APC as KRD = AWS Payment Cryptography(接收方)
+    APC->>APC: get_parameters_for_import(TR34_KEY_BLOCK, RSA_3072)
+    APC-->>KDH: ①返回 ImportToken + AWS的包裹公钥证书(KRD证书)
+    KDH->>KDH: ②用AWS的KRD公钥包裹要传的密钥(机密性)
+    KDH->>KDH: ③用自己的KDH CA私钥签名(来源真实性,防伪造)
+    KDH->>APC: ④import_key(RootCertificatePublicKey=KDH的CA证书)<br/>先让AWS能验证KDH签名
+    KDH->>APC: ⑤import_key(Tr34KeyBlock{ImportToken,SigningKeyCertificate,<br/>WrappedKeyBlock,RandomNonce,KeyBlockFormat=X9_TR34_2012})
+    APC->>APC: ⑥验KDH签名(防伪造)+用自己私钥解包+校验Nonce(防重放)<br/>→密钥进入AWS HSM,返回KeyArn
+    Note over KDH,APC: 公钥包裹保机密(只有AWS能解),KDH签名保来源,ImportToken+Nonce防重放
 ```
 
-🔧 **两层密码学保障**：
-- **机密性**：用接收方公钥加密——**只有接收方的私钥能解**，中途截获也没用。
-- **真实性/防伪**：发送方用自己私钥签名——接收方验签确认"这密钥确实来自真正的发送方"，防中间人伪造。
-- 靠**数字证书**（CA 签发）建立公钥与身份的绑定。
+🔧 **流程关键点（sample 验证）**：
+- **机密性**：用 AWS 返回的 **KRD 公钥**包裹密钥——只有 AWS 的私钥能解，中途截获没用。
+- **真实性/防伪**：KDH 用**自己的 CA 私钥签名**；导入前要先 `import_key(RootCertificatePublicKey=...)` 把 **KDH 的 CA 证书**导入 AWS，AWS 才能验证 KDH 的签名。
+- **防重放**：`GetParametersForImport` 返回的 **ImportToken**（一次性）+ **RandomNonce**（2-pass）防止密钥块被重放。
+- **格式**：`KeyBlockFormat = X9_TR34_2012`（TR-34 2012 non-CMS）。
+- RSA_3072 包裹密钥可支持到 AES-128 的密钥导入。
 
-💡 **业务场景**：一台新 POS 终端首次注入密钥、一个新接入的发卡行首次和收单机构建立密钥关系——**没有预共享密钥**，用 TR-34 完成首次密钥交换。建信之后，后续日常密钥分发就回到更轻量的 TR-31。
-☁️ Payment Cryptography 的 `GetParametersForImport`（获取导入用的公钥）+ `ImportKey`（TR-34 模式）支持。
+💡 **业务场景**：一个新接入的机构首次和 AWS（或对方）建立密钥关系——**没有预共享密钥**，用 TR-34 完成首次密钥交换。建信之后，后续日常密钥分发回到更轻量的 TR-31。
 
-> 🔑 **TR-31 vs TR-34 一句话**：TR-34 用**非对称**解决"**首次**建信"（贵但能从零建立），TR-31 用**对称**解决"**日常**传密钥"（快，但要求已有 KEK）。先 TR-34 建信，后 TR-31 日常——这是密钥分发的标准两段式。
+☁️ **AWS API（sample 实证）**：`get_parameters_for_import('TR34_KEY_BLOCK','RSA_3072')` 拿 ImportToken+KRD证书 → `import_key(RootCertificatePublicKey=KDH CA)` 导入签名验证证书 → `import_key(Tr34KeyBlock={...})` 提交包裹密钥块。
+
+> ⚠️ **关于"分量"的准确事实（核对 sample 后修正）**：AWS sample 的导入脚本**确实接受 `--component1/2/3` 三个分量**，但 **XOR 合成发生在客户侧（KDH 本地）**——脚本在本地把 3 个分量 XOR 成完整明文密钥，再走上面的 TR-34 流程包裹导入。**AWS 这边的 API 入口始终是 TR-34/TR-31，不是"逐个录入分量到 AWS"**。且 sample README 明确标注：**处理明文密钥/明文分量的脚本仅用于测试环境**（生产环境分量应在物理 HSM 内合成，绝不明文落到普通主机）。详见 §2.4。
+
+> 🔑 **TR-31 vs TR-34 一句话**：TR-34 用**非对称**解决"**首次**建信"（贵但能从零建立），TR-31 用**对称**解决"**日常**传密钥"（快，但要求已有 KEK）。先 TR-34 建信，后 TR-31 日常——这是密钥分发的标准两段式（AWS sample 的 README 正是这么演示的：先 TR-34 建 KEK，再 TR-31 传工作密钥）。
 
 ### 2.3 DUKPT：一次一密——"终端密钥泄露了，怎么把损失关在一笔交易里"
 
@@ -191,13 +202,14 @@ sequenceDiagram
     ACQ->>ISS: PIN Block用ZPK加密/翻译传输(明文PIN与明文ZPK都不出HSM)
 ```
 
-> 📌 **一句话**：ZPK 用上一层 **ZMK 加密**、以 **TR-31** 格式传输；ZMK（第一把共享密钥）通过**人工密钥仪式（传统物理HSM，双重控制+分量XOR）或 TR-34（现代/AWS）** 建立。全程明文密钥和明文 PIN 都不出 HSM。（⚠️ AWS Payment Cryptography 只走 TR-34，不录明文分量——详见下方）
+> 📌 **一句话**：ZPK 用上一层 **ZMK 加密**、以 **TR-31** 格式传输；ZMK（第一把共享密钥）通过**人工密钥仪式（传统物理HSM，双重控制+分量XOR）或 TR-34（现代/AWS）** 建立。全程明文密钥和明文 PIN 都不出 HSM。（⚠️ 导入 AWS 时 API 入口是 TR-34/TR-31 密钥块；分量若有，在客户侧 XOR 合成后再走 TR-34——详见下方）
 >
 > 🎯 **交流要点**：能讲"ZMK 先建（仪式/TR-34）→ ZPK 用 ZMK 包着 TR-31 传 → ZPK 日常加密 PIN"这条三级分发链，并知道"密钥仪式=双重控制+知识分割"，是支付密钥管理的实务核心——银行密钥管理团队日常就干这个。
 
-#### ☁️ AWS Payment Cryptography 怎么处理密钥导入（经官方文档核实）
+#### ☁️ AWS Payment Cryptography 怎么处理密钥导入（经官方文档 + sample 代码核实）
 
-⚠️ **关键澄清**：上面的"人工密钥仪式（多人录分量 XOR 合成）"是**传统物理 HSM** 的做法。**AWS Payment Cryptography 不提供"多人现场录明文分量"的 API**——这是它的设计选择，用 TR-34 非对称交换来替代整个分量仪式。
+⚠️ **关键澄清**：上面的"人工密钥仪式（多人录分量 XOR 合成）"是**传统物理 HSM** 的做法。**AWS Payment Cryptography 的 API 入口不是"逐个录分量"，而是 TR-34/TR-31/RSA Wrap 这类密钥块**。
+> 📌 **关于分量（核对官方 sample 后的准确说法）**：AWS 官方 sample 的导入脚本**确实支持 `--component1/2/3` 三分量**，但 **XOR 合成发生在客户侧（KDH 本地）**——本地把分量 XOR 成完整密钥，再走 TR-34 包裹导入 AWS。所以"分量"这一步仍在客户侧/客户 HSM 完成，AWS 收到的是 TR-34 密钥块。且 sample 明确：处理明文分量的脚本**仅测试环境**用，生产环境分量应在物理 HSM 内合成、绝不明文落普通主机。
 
 📌 **`ImportKey` 支持的导入方式**（官方确认）：
 
@@ -214,7 +226,7 @@ sequenceDiagram
 flowchart TB
     A["传统:多人录明文分量XOR合成ZMK/LMK/BDK"] -->|AWS替代| B["TR-34非对称交换<br/>(RSA加密保机密+签名保来源)"]
     C["LMK 根密钥"] -->|AWS完全托管| D["用户无需管理<br/>(在FIPS 140-2 L3 HSM内生成/存储/使用)"]
-    E["遗留系统已用分量建的ZMK"] -->|迁移| F["先在本地HSM合成完整密钥<br/>再用TR-34导入AWS"]
+    E["遗留系统的分量密钥(ZMK/BDK)"] -->|迁移| F["在客户侧/本地HSM XOR合成完整密钥<br/>再用TR-34包裹导入AWS"]
 ```
 
 - **首次建信**：用 **TR-34**（`GetParametersForImport` 拿 AWS 包裹公钥证书 → 本地包裹密钥 → `ImportKey`）——RSA 加密保机密、数字签名保来源，效果等价于分量仪式的安全性，但无明文暴露、可远程异步、CloudTrail 全程可审计。
