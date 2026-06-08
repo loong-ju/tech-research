@@ -703,7 +703,7 @@ flowchart TB
         LEDGER["发卡账本<br/>记账/对账"]
         RISK2["风控<br/>盗刷/异常"]
     end
-    CSN["卡组织"] -->|授权请求(每笔刷卡)| AUTH
+    CSN["卡组织"] -->|"授权请求(每笔刷卡)"| AUTH
     AUTH --> RULE2
     AUTH --> ACCT
     AUTH -->|批准或拒绝| CSN
