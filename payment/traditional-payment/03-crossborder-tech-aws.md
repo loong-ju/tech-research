@@ -226,7 +226,7 @@ flowchart TB
 - **带引用的深度报告（数据/新兴技术）** → `跨境支付深度研究报告.md`
 - **稳定币如何用链上账本重做跨境** → 模块4
 - **制裁/AML/KYC 体系化 + AI 改造** → 模块6 + `reference/summary/`
-- **跨境收款公司=跨境PayFac 技术底座** → 模块1深化 `01b`
+- **跨境收款公司=跨境PayFac 技术底座** → 模块1 `01-cards-tech-aws.md` §7(PayFac平台) + `01-cards-business.md` §4.6
 
 ---
 
