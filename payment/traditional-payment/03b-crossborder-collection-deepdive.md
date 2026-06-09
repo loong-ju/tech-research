@@ -2,10 +2,10 @@
 
 > **学习者**：AWS 技术架构师 · 支付小白
 > **本篇目标**：把"一笔跨境电商货款从海外买家到中国卖家"的全链路**逐环节挖透**——每一步的资金流、账务、谁持牌、技术实现、AWS。以连连/PingPong/Airwallex 为例。这是直击"和跨境收款公司深度交流"目标的实战深化。
-> **前置**：模块3(跨境业务/技术)、模块1深化01b(跨境收款=跨境PayFac)、`跨境支付深度研究报告.md` 3.3/9.2节
+> **前置**：模块3 业务篇 `03-crossborder-business.md`（§14.2 案例 + §13 中国出海）、模块1深化01b(跨境收款=跨境PayFac)
 > **组织方式**：top-down 全链路。零散追问见 FAQ。
 > 标注：🔧 通用 · ☁️ AWS · 📌 关键 · ⚠️ 合规/坑点 · 🎯 交流要点
-> ⚠️ **可信度**：SAFE 汇发〔2019〕13号、收款服务商"两段式"已在 `跨境支付深度研究报告.md` 核查；各公司具体牌照/费率以其官网披露为准，本文为机制层讲解(🔧公知级)。
+> ⚠️ **可信度**：SAFE 汇发〔2019〕13号、收款服务商"两段式"已核查（来源见业务篇 `03-crossborder-business.md` 附A [10]）；各公司具体牌照/费率见企业画像 `03c-crossborder-players/`，本文为机制层讲解(🔧公知级)。
 
 ---
 
@@ -71,7 +71,7 @@ flowchart TB
 - 美国：MSB（Money Services Business）注册 / 各州 MTL（Money Transmitter License）
 - 欧盟：EMI（电子货币机构）；英国：FCA EMI；香港：MSO；新加坡：MAS MPI
 - 中国境内：SAFE 跨境外汇业务资质
-> 📖 Airwallex 多国牌照矩阵已在 `跨境支付深度研究报告.md` 第二轮核查确认(英FCA EMI/立陶宛EMI/荷兰DNB/新MAS/港MSO)。
+> 📖 Airwallex 等各家多国牌照矩阵已逐家 deep-research 核查，详见企业画像 `03c-crossborder-players/airwallex.md`（含英FCA EMI/荷兰DNB EMI/新MAS MPI/港MSO/美40州MTL 等）。
 
 ☁️ **AWS**：境外本地账户的管理（账户开立、状态、与各国合作银行对接）= 商户管理系统(Aurora)+多区域部署(就近合规)+各国银行接口(ECS网关)。
 
@@ -276,7 +276,8 @@ flowchart TB
 
 - **跨境业务/技术全景** → 模块3 `03-crossborder-business/tech-aws.md`
 - **收款公司=跨境PayFac产业链定位** → 模块1深化 `01-cards-business.md` §4.6
-- **带引用的深度报告(SAFE/案例)** → `跨境支付深度研究报告.md`
+- **带引用的来源清单(SAFE/G20/新兴技术)** → `03-crossborder-business.md` 附A
+- **跨境头部企业画像(13家)** → `03c-crossborder-players/`
 - **稳定币能否绕开这套(on/off-ramp合规)** → 模块4 + `stablecoin_cross_border_compliance.md`
 - **合规/风控体系** → 模块6.1/6.2
 

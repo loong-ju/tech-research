@@ -228,7 +228,7 @@ flowchart TB
 
 - **业务全景** → `04-stablecoin-business.md`
 - **区块链基础深度** → `stablecoin_research.md` 第1节
-- **CBDC/mBridge 技术（央行版链上账本）** → `跨境支付深度研究报告.md` 第八部分
+- **CBDC/mBridge 技术（央行版链上账本）** → `traditional-payment/03-crossborder-business.md` §7/§12.2
 - **稳定币作为 Agent 支付结算资产、x402** → 模块5 + `stablecoin_research.md` 第7节
 - **合规体系（Travel Rule/链上AML）** → 模块6 横向专题
 
