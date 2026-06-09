@@ -11,6 +11,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8911
 IGNORE = {".git", ".claude", ".playwright-mcp", "__pycache__", ".DS_Store", "node_modules"}
+# 左侧导航里默认不显示的文件(不区分大小写;文件本身仍可直接访问)
+NAV_HIDE = {"index.md", "claude.md"}
 
 PAGE_TMPL = """<!DOCTYPE html>
 <html lang="zh"><head><meta charset="utf-8">
@@ -195,7 +197,7 @@ def build_tree(active_rel=""):
         except OSError:
             return ""
         dirs = [e for e in entries if os.path.isdir(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
-        files = [e for e in entries if os.path.isfile(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
+        files = [e for e in entries if os.path.isfile(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".") and e.lower() not in NAV_HIDE]
         dirs.sort(key=lambda e: (DIR_ORDER.get(e, 8), e))
         if depth == 0:
             files.sort(key=lambda e: (ROOT_FILE_ORDER.get(e, 5), e))
