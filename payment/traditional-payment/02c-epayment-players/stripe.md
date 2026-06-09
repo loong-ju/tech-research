@@ -249,12 +249,45 @@ flowchart TB
 - 董事会：Mark Carney 2021 入、2025 离任(竞选加拿大自由党领袖)
 - **法律实体**：Stripe, Inc.(美母公司)→ Stripe Payments Company(美持牌)/SPEL(爱尔兰 EMI)/Stripe Payments UK(FCA)/Bridge Building Inc(美)·Sp. z o.o.(波兰)·Bridge Ventures LLC(稳定币)。⚠️ 内部事业群按产品线(Payments/Revenue&Finance Automation/BaaS/Stablecoin-Bridge/Atlas)
 
-## 10. 技术架构特点 📌
-- **API-first**：开发者友好 REST API+幂等键+完善文档+多语言 SDK，是"开发者最爱"定位的技术根基；Billing 报 99.999% 可用性(自述)
-- **AI 布局**：2025-05 发布**支付基础模型**(用全网 $1.9T/197国交易数据训练，用于欺诈识别/授权优化)；2026-04 Sessions 发 288 项 AI 功能
-- **Agentic**：与 OpenAI 共建 **ACP 协议**(AI agent 对话内下单结算)；2026-05 接入 **AWS AgentCore + Privy** 做 agent 支付
-- **稳定币栈**：Bridge(Orchestration/Issuance API+自有稳定币 **USDB** 1:1 USD+BlackRock 基金支撑)；Privy(TEE 硬件隔离+分布式密钥分片嵌入式钱包，支持 EVM/Solana/Bitcoin)
-- ⚠️ 是否自建/用某公有云无权威一手披露(历史有用 AWS 报道，未核)
+## 10. 技术架构特点 📌（经 AWS 官方案例+Stripe 工程博客+re:Invent 深度核查）
+
+> ⚠️ **可信度分层**：Stripe 以基础设施不透明著称。本节区分 **📌官方证实 / 🔧权威二手 / ⚠️架构推断**——"全平台在 AWS"已确证，但**核心支付链路用了哪些 AWS 服务，官方从未点名，凡 AWS 服务映射均为推断、非 Stripe 实际在用**。
+
+### 10.1 是否用 AWS：📌确证"全平台 entirely on AWS"，但服务清单是黑箱
+- 📌 **AWS 官方 Stripe 案例页(一手)**："**Since 2011, Stripe has delivered its PCI-compliant payment platform entirely on AWS**"——自 2011 年整个 PCI 合规支付平台**完全跑在 AWS 上**，非自建数据中心、非多云。⚠️ 系 AWS 营销页+Stripe 自述口径，但"是否用 AWS"这一层确证；"自建数据中心"传闻经多源检索**无任何权威支撑、判定不成立**。
+- 📌 **唯一被官方详细点名的服务=可观测性栈**：Amazon **Managed Service for Prometheus(AMP)**+**Managed Grafana**+**CloudWatch**(re:Invent 2023 session "Architecting for Observability at Massive Scale"，讲者 Cody Rioux/Stripe+Hasan Tariq/AWS；AWS mt 博客 2024-10-24)。规模：约 **3000 工程师/360 团队/每 10 秒 5 亿条指标**；迁移后成本降一个数量级。
+- 📌 **Amazon S3**：用于核心数据链路的 CDC 归档(DocDB Oplog→Kafka→S3)——少数能确证在核心链路的 AWS 服务。
+- ⚠️ **EC2/RDS/Aurora/DynamoDB/EKS/Lambda/SageMaker 等**：官方从未点名，"全平台在 AWS 必有 EC2 等基础服务"是合理推断、**不应硬编为事实**。关键认知：**Stripe 在 AWS 公有云之上自建了 DocDB/Ledger/Radar/Shepherd 等核心系统，而非直接消费 AWS 托管服务**。
+
+### 10.2 底层地基：自建 DocDB + Ruby 巨型单体 📌+🔧
+- **主存储=自研 DocDB**(扩展 MongoDB Community，**非** Mongo Atlas/DynamoDB/Aurora)：约 **500 万 queries/sec、2000+ shards、5000+ collections、PB 级、99.999% 可用、2023 处理约 $1T**；Go 写的**分片 proxy** 按 chunk 元数据路由；每 shard 为 replica set；**Data Movement Platform** 零停机跨 shard 迁移(靠"先排序再插入"利用 B-tree 拿 10 倍写吞吐、versioned gating 切流 <2 秒)。
+- **主语言**：📌 **Ruby 巨型单体**(>1500 万行/15 万文件，为此自研静态类型检查器 **Sorbet**)；Go(基础设施)；Scala+Spark(数据/ML)；前端 TypeScript/React(曾单 PR 迁 370 万行)。
+- **CDC 管道**：DocDB Oplog→Kafka→S3 归档。
+
+### 10.3 逐组件技术架构与攻克的难点 📌+⚠️
+
+| 组件 | 已知架构(📌官方/🔧二手) | 攻克的难点 | AWS 映射(⚠️推断) |
+|---|---|---|---|
+| **Payments 收单** | 全 POST 端点 **Idempotency-Key** + SDK 指数退避+jitter 重试=exactly-once📌(2017博客；key 存储未公开) | 网络不可靠下"恰好一次"、防重复扣款 | DynamoDB 条件写幂等表/Step Functions Saga(⚠️实为自建 DocDB) |
+| **Connect/Ledger 账本** | 独立系统 **Ledger**📌(2024-02博客)：**不可变事件日志+复式记账**(借贷平衡=数学正确性证明)，每天约 **50 亿 events**，**>99.9999% 资金可解释性**，查询用 Presto | 多方资金归属强一致+可审计("钱不能凭空多/少") | QLDB(理念最近但 Stripe 自建未用)/Athena 对应 Presto |
+| **Radar 反欺诈** | 📌每笔 **<100ms 评估 1000+ 特征**、误拦仅 **0.1%**；模型 逻辑回归→XGBoost+DNN→2022 纯 DNN(ResNeXt 启发，训练时间降 85%)；特征平台 **Shepherd**(改造 Chronon)；相关检索用 Elasticsearch；BFCM2025 拦 2460 万笔欺诈 | <100ms 内取千级特征(在线 feature store)+延迟/精度双约束 | SageMaker 训推/DynamoDB 在线特征/OpenSearch 对应 ES(⚠️大概率自建模型服务) |
+| **多币种/全球清算** | 经 Ledger 复式记账天然支持多币种 | 跨币种/跨区域一致+数据驻留 | 多 AWS 区域(🔧二手称，无一手) |
+| **Issuing/Treasury** | 组件级架构**未公开**，推断构建在 Ledger 之上 | — | — |
+| **Bridge 稳定币/AgentCore** | 📌2026-05 AWS×Stripe 把 Stripe 钱包基础设施(**Privy 提供，a Stripe company**)集成进 **Amazon Bedrock AgentCore Payments**(preview)，首发 x402 协议 stablecoin 微支付(常<$1)，计划扩法币；Bridge 链上架构未公开 | Agent 自主支付的钱包/限额/微支付 | Bedrock AgentCore(📌确证) |
+
+### 10.4 可靠性与峰值 📌
+- 📌 **99.999%**(五个9)：文档数据库可用性(Stripe 工程博客标题即此，2024-06)；靠 DocDB 分片+replica set+零停机迁移(升级在线进行、不靠维护窗口)。
+- 📌 **BFCM 2025**：四天结算额 **>$40B**(史上最大)、**5.78 亿+笔**、峰值 **>152,000 笔/分钟**、Cyber Monday 单日 >$10B；API 维持 **99.9999%+**(⚠️促销季公关峰值口径非全年 SLA)。
+- ⚠️ **纠偏**："Radar 用 $1.9T 全网数据训练"该精确值未在官方 Radar 博客出现，宜表述为"基于全网规模数据训练"(§5/§6 提及处同此)。
+- ⚠️ 未找到 Stripe 官方带根因的重大事故 post-mortem(透明度低于 Cloudflare/AWS)；二手记 2023-06-30 Dashboard 遭 DDoS(影响后台非支付链路)。
+
+### 10.5 Agentic/稳定币技术栈 📌
+- **ACP 协议**：与 OpenAI 共建(AI agent 对话内下单结算)
+- **AgentCore Payments**(2026-05-07 preview)：与 Coinbase/Stripe 共建，预览区域 US East/West、欧洲法兰克福、亚太悉尼
+- **Privy**(Stripe 收购，CEO Henri Stern)：TEE 硬件隔离+分布式密钥分片嵌入式钱包，提供 stablecoin 钱包/支付 rails
+- **Bridge**：自有稳定币 USDB(1:1 USD+BlackRock 基金支撑)
+
+> 🎯 **与 AWS 对话的硬抓手**(基于已确证事实)：① Stripe 是 **"entirely on AWS 自 2011"** 的标杆客户——可正面引用；② **可观测性(AMP+Managed Grafana，每10秒5亿指标)** 是唯一公开的深度合作领域，是探讨大规模可观测性的真实案例；③ **2026-05 AgentCore Payments 合作**(经 Privy)是当下最热的 agent 支付入口。⚠️ 但**别假装知道 Stripe 核心链路的 AWS 服务清单**——那是黑箱，硬编会被内行识破。
 
 ## 11. 护城河与差异化
 ① **开发者体验/API 标准**(开发者心智+高切换成本) ② **全栈产品锁定**(收单→发卡/银行/税务/注册，交叉销售) ③ **Radar 全网数据网络效应**(92% 卡见过) ④ 多区域牌照(爱尔兰 EMI+美国 MTL) ⑤ **Link 一键结账网络效应**(2亿用户) ⑥ **稳定币卡位最激进**(Bridge $1.1B+Privy 双收购+自有 USDB，把"全球美元账本"卡进自家栈)
