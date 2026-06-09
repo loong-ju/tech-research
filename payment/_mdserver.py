@@ -34,6 +34,14 @@ body{{margin:0;font-family:-apple-system,"Microsoft YaHei UI",Arial,sans-serif;c
 #side a:hover{{background:var(--bg)}}
 #side a.dir{{color:var(--slate);font-weight:600;margin-top:6px}}
 #side a.doc.active{{background:#FFF7ED;color:var(--accent);font-weight:600}}
+/* 可折叠目录:一级展示,点击展开二三级 */
+#side details{{margin:0}}
+#side details>summary{{list-style:none;cursor:pointer;display:block;padding:4px 8px;border-radius:6px;color:var(--slate);font-weight:600;margin-top:6px;user-select:none}}
+#side details>summary::-webkit-details-marker{{display:none}}
+#side details>summary:hover{{background:var(--bg)}}
+#side details>summary::before{{content:"▸";display:inline-block;width:1em;color:var(--slate);transition:transform .15s}}
+#side details[open]>summary::before{{transform:rotate(90deg)}}
+#side details .kids{{margin-left:10px;border-left:1px solid var(--border);padding-left:4px}}
 /* 二级:章节导航 */
 .toc{{margin:2px 0 8px 14px;border-left:2px solid var(--border);padding-left:6px}}
 .toc a{{font-size:12.5px;color:var(--slate);padding:3px 8px}}
@@ -153,42 +161,53 @@ ROOT_FILE_ORDER = {
 
 
 def build_tree(active_rel=""):
-    """左侧目录树：按学习模块顺序排列；当前文档展开章节(二级导航)。"""
-    lines = []
+    """左侧目录树：默认只展示一级；目录用 <details> 折叠，点击展开二/三级。
+    当前打开文件所在的目录链路自动展开(open)；当前文档内联展开其章节(二级导航)。"""
+    # 当前 active 文件所在的各级目录前缀(用于 auto-open)
+    active_dirs = set()
+    if active_rel:
+        parts = active_rel.split("/")[:-1]
+        acc = ""
+        for p in parts:
+            acc = os.path.join(acc, p) if acc else p
+            active_dirs.add(acc)
+
     def walk(d, depth, rel):
         try:
             entries = os.listdir(d)
         except OSError:
-            return
+            return ""
         dirs = [e for e in entries if os.path.isdir(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
         files = [e for e in entries if os.path.isfile(os.path.join(d, e)) and e not in IGNORE and not e.startswith(".")]
-        # 目录按学习模块顺序；文件：根级按总纲优先序+名字，子目录内按名字(编号01/02..自然有序)
         dirs.sort(key=lambda e: (DIR_ORDER.get(e, 8), e))
         if depth == 0:
             files.sort(key=lambda e: (ROOT_FILE_ORDER.get(e, 5), e))
         else:
             files.sort()
+        out = []
+        # 同级先列文件，再列子目录(可折叠)
         for e in files:
             if not (e.endswith(".md") or e.endswith(".html")):
                 continue
             r = os.path.join(rel, e) if rel else e
             active = (r == active_rel)
             cls = "doc active" if active else "doc"
-            pad = "&nbsp;" * (depth * 2)
             ico = "📄" if e.endswith(".md") else "🌐"
-            lines.append(f'<a class="{cls}" href="/{urllib.parse.quote(r)}">{pad}{ico} {html.escape(e)}</a>')
-            # 当前文档：紧跟着展开它的章节(二级导航)
+            out.append(f'<a class="{cls}" href="/{urllib.parse.quote(r)}">{ico} {html.escape(e)}</a>')
             if active and e.endswith(".md"):
                 toc = extract_toc(os.path.join(d, e))
                 if toc:
-                    lines.append(toc)
+                    out.append(toc)
         for e in dirs:
             r = os.path.join(rel, e) if rel else e
-            pad = "&nbsp;" * (depth * 2)
-            lines.append(f'<a class="dir" href="/{urllib.parse.quote(r)}/">{pad}📁 {html.escape(e)}/</a>')
-            walk(os.path.join(d, e), depth + 1, r)
-    walk(ROOT, 0, "")
-    return "\n".join(lines)
+            opened = " open" if r in active_dirs else ""
+            kids = walk(os.path.join(d, e), depth + 1, r)
+            out.append(
+                f'<details{opened}><summary>📁 {html.escape(e)}/</summary>'
+                f'<div class="kids">{kids}</div></details>'
+            )
+        return "\n".join(out)
+    return walk(ROOT, 0, "")
 
 
 def crumb(rel):

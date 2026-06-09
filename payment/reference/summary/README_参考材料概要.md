@@ -1,13 +1,13 @@
 # 📚 参考材料概要总结（reference/ PPTX）
 
-> **用途**：`reference/` 目录下 4 份 PPTX 演示文稿的概要性总结，供后续研究使用。每份的逐页详细总结见同目录对应的 `*_总结.md`。
-> **共同主题**：**支付 × Agentic AI / Agentic Commerce**——AI Agent 如何成为支付/商务的新主体，以及 AWS 在其中提供的能力。
+> **用途**：`reference/` 目录下 5 份 PPTX 演示文稿的概要性总结，供后续研究使用。每份的逐页详细总结见同目录对应的 `*_总结.md`。
+> **主题分布**：前 4 份共同主题为 **支付 × Agentic AI / Agentic Commerce**（AI Agent 成为支付/商务新主体 + AWS 能力）；第 5 份 `TechSummit_Quick合规` 主题独立，是 **跨境支付合规 × Amazon Quick** 的落地演示，主要喂给模块6.2 合规。
 > **生成方式**：文本型 PPT 由 python-pptx 提取文本后分析；图片型 PPT（整页 PNG）由视觉识别逐页读取。
-> 最后更新：2026-06-08
+> 最后更新：2026-06-09
 
 ---
 
-## 一、四份材料速览
+## 一、五份材料速览
 
 | 文件 | 页数 | 类型 | 一句话定位 | 详细总结 |
 |---|---|---|---|---|
@@ -15,11 +15,13 @@
 | **Agentic_AI_on_payment_PPT_v2_zh_new.pptx** | 93 | 文本+视频 | **单客户（iPaylinks）深度落地**：6大改造机会+20+真实案例+2个PoC+demo话术 | `Agentic_AI_on_payment_总结.md` |
 | **Agentic_Commerce_Overview.pptx** | 20 | 整页图片 | **Agentic Commerce 协议全景与趋势**：四层协议栈、卡组织vs稳定币双轨、标准收敛 | `Agentic_Commerce_Overview_总结.md` |
 | **AgenticPayment_介绍.pptx** | 31 | 整页图片 | **Agentic Payment 安全与协议**：付款人不在场问题、TAP/AP2/VCN/x402、AWS两条资金轨 | `AgenticPayment_介绍_总结.md` |
+| **TechSummit_Quick合规_Session.pptx** | 26 | 文本 | ⚠️**主题独立**：**跨境支付合规 × Amazon Quick** 现场演示——合规三战线痛点+可溯源问答/差距Agent/KYB/AML-SAR/Dashboard 全链路（XPay 虚构脱敏数据） | `TechSummit_Quick合规_总结.md` |
 
-> 📊 **四份材料的关系**：
+> 📊 **五份材料的关系**：
 > - **Payment_Agentic_AI**（框架）+ **Agentic_AI_on_payment**（落地）= AWS 售前的"方法论 + 单客户实战"组合，偏 **AWS 服务与销售视角**。
 > - **Agentic_Commerce_Overview**（协议全景）+ **AgenticPayment_介绍**（安全协议）= 行业协议与技术视角，偏 **协议生态与信任机制**。
-> - 四份合起来，覆盖了 agentic payment 的"业务机会 + AWS 实现 + 协议生态 + 安全信任"四个面。
+> - 以上四份合起来，覆盖了 agentic payment 的"业务机会 + AWS 实现 + 协议生态 + 安全信任"四个面。
+> - **TechSummit_Quick合规**（第5份）主题不同——不是 Agentic，而是 **跨境支付合规的真实工作流痛点 + AWS GenAI 工具（Amazon Quick）落地**，主要喂给**模块6.2 合规**与跨境（模块3）研究；其下方"主题2-6"提炼仅针对前 4 份 Agentic 材料。
 
 ---
 
@@ -71,6 +73,17 @@
 
 ---
 
+## 二B、第5份独立主题：跨境支付合规 × Amazon Quick
+
+（来自 `TechSummit_Quick合规_Session.pptx`，⚠️ AWS 现场演示/带货脚本 + 虚构脱敏数据，非研究结论）
+
+- **核心痛点**：合规"三条战线同时开火"——①多辖区监管变动（新规一周一变、人读人比对改 SOP）②商户准入 KYB（制裁/UBO 穿透/店铺真实性，一单几小时）③反洗钱 AML（海量流水靠人眼捞可疑集群）。本质是"**人力线性、监管指数**"。出海公司**双重监管**：境内 SAFE 盯资金真实性 + 境外 MAS/FinCEN，一笔交易两头交代。
+- **解法 = Amazon Quick**（QuickSight BI + Q Business 企业 AI 合并升级的生成式 AI 工作平台）三大兑现：**可溯源**（问答带原文出处，合规审计刚需）+ **Agent**（差距比对/风险评分/SAR 起草自动算）+ **Dashboard**（KPI 实时预警）。差异化：非技术合规人员零代码可用 + Web/Desktop 双入口（敏感文件 local-first）。
+- **演示全链路**（XPay 虚构数据，MAS PSO-N02 新规事件）：知识库可溯源问答 → SOP 差距比对 Agent → KYB 准入评分 Agent（72 分高风险/World-Check 命中/UBO 未披露）→ AML 告警调查 + 跨辖区（SAFE+MAS/STRO）SAR/STR 起草 Agent → 合规驾驶舱。全程 human-in-the-loop。
+- **方法论**：四步把合规搬上 Quick——沉淀知识（Space）→ 配 Agent → 建 Dashboard → 闭环人审。
+
+---
+
 ## 三、对本支付研究项目的价值与衔接
 
 | 这些材料覆盖的 | 对应本项目模块 |
@@ -81,6 +94,7 @@
 | 卡网络 vs 稳定币双轨、Stripe Bridge、x402 | 模块4（稳定币）、模块5 |
 | AWS AgentCore/Bedrock/Payment Cryptography | 各技术篇的 AWS 方案 |
 | 付款人不在场/可验证凭证/Agent 身份 | 模块5 核心问题 |
+| 跨境合规三战线工作流（监管追踪/KYB/AML-SAR）+ 双重监管 + Amazon Quick 落地 | 模块6.2 合规、模块3 跨境（来自第5份 TechSummit_Quick合规） |
 
 > 💡 **后续研究用法**：
 > 1. 写**模块5（Agentic Payment）**时，这 4 份是一手参考（协议格局、玩家、AWS 实现）。
