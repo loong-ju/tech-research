@@ -48,13 +48,15 @@ flowchart TB
 
 | 密钥 | 全称 | 用途 | 业务场景解释 |
 |---|---|---|---|
-| **KEK** | Key Encryption Key | 保护其他密钥的传输与存储 | 你要把一把 PIN 密钥从总行发到分行/从收单机构发给发卡行，明文密钥绝不能裸传——用 KEK 把工作密钥"包起来"加密传输。它是密钥分层的"中间管理层"，本身不直接参与交易运算，只负责"锁住别的密钥"。 |
+| **KEK / ZMK** | Key Encryption Key / Zone Master Key | 保护其他密钥的传输与存储 | 你要把一把 PIN 密钥从总行发到分行/从收单机构发给发卡行，明文密钥绝不能裸传——用 KEK 把工作密钥"包起来"加密传输。它是密钥分层的"中间管理层"，本身不直接参与交易运算，只负责"锁住别的密钥"。**ZMK（区域主密钥）就是 KEK 用在"两个机构(zone)之间"时的名字**（= KBPK = ZCMK，§2.3/§2.8）——和"PEK→ZPK"是同一种命名规律（通用名→zone 实例）。在 APC 里建 ZMK，建的就是一把 KEK 类型密钥（TR-31 用途码 `K0`），并无独立"ZMK 类型"。 |
 | **PEK / ZPK** | PIN Encryption Key / Zone PIN Key | 加密 PIN 块（节点间传 PIN 用） | 持卡人在 ATM/POS 输入 PIN，PIN 不能明文在网络上传。PEK/ZPK 把 PIN 加密成"PIN Block"。ZPK 特指**两个机构（zone）之间**约定的 PIN 密钥——收单机构和发卡行之间传 PIN 就用双方约定的 ZPK。PIN 翻译（§4.2）就是把 PIN Block 从一把 ZPK 换成另一把 ZPK。 |
 | **PVK** | PIN Verification Key | 生成/校验 PIN 验证值（PVV） | 发卡行**不存明文 PIN**，而是用 PVK 把 PIN+卡号算出一个 **PVV（验证值）**存起来。用户每次输 PIN，发卡行用 PVK 重新算一遍 PVV 比对——对得上就是 PIN 正确。这样数据库泄露也拿不到明文 PIN。发卡行专用。 |
 | **BDK** | Base Derivation Key | DUKPT 体系的根密钥（POS/ATM 终端） | 一台 POS 机要做到"每笔交易用不同密钥"（一次一密，防截获），靠的是 BDK。BDK 是收单机构持有的"母密钥"，给每台终端注入一个由 BDK 派生的初始密钥；终端每笔交易再用 KSN（计数器）派生唯一密钥。**即使某笔交易密钥泄露，也推不出 BDK 和其他交易密钥**。收单/终端体系核心。 |
 | **CVK** | Card Verification Key | 生成/校验 CVV/CVV2/iCVV | 发卡时用 CVK 根据卡号+有效期算出卡背面的 **CVV2**（那三位数）；交易时用户输入 CVV2，发卡行用 CVK 实时校验。⚠️ CVV2 本身不可存储（PCI 红线），靠 CVK 实时算。iCVV 是芯片卡里的版本。发卡行/3DS 服务商用。 |
 | **EMV Master Key** | EMV Issuer Master Key | 验证芯片卡 ARQC、生成 ARPC | 芯片卡每笔交易生成动态密文 ARQC（证明"我是真卡"）。发卡行用 EMV 主密钥派生出"卡级密钥→会话密钥"来验证 ARQC，并生成 ARPC（证明"我是真发卡行"）回给卡。这是芯片卡**双向防伪、防复制**的根。发卡行专用，一张卡一套派生密钥。 |
 | **MAC Key** | Message Authentication Code Key | 报文认证码（防篡改） | 收单/发卡/卡组织之间传的授权报文（如 ISO 8583），怕被中途篡改金额或卡号。发送方用 MAC Key 给报文算一个"指纹"（MAC）附在报文后，接收方用同样的 MAC Key 重算比对——不一致说明被篡改。保证报文**完整性与来源真实性**，各节点间都用。 |
+
+> ⚠️ **为什么表里没有 LMK**：上面是"**你创建/导入/使用的密钥类型**"。**LMK（Local Master Key，本地主密钥）不属于这一类——它是 HSM 的内部基础设施/信任根**：锁死在防篡改硬件里、永不出设备（连密文都不离开），自动加密保护其余所有密钥，你无法直接调用它。所以它出现在**层级图顶端**（§2.1 那张 `LMK→KEK→…`）表达结构，却不进"密钥类型表"。在 **Payment Cryptography（serverless）里你更没有"创建 LMK"这个动作**——根保护由 AWS 用 FIPS 140-2 L3 HSM 托管（§3.1）。一句话：**LMK 是地基不是建材，ZMK 已并入 KEK，所以这张"建材表"里两者都不单列。**
 
 #### 2.1.1 密钥粒度：各场景建多少把、什么粒度
 
@@ -132,7 +134,7 @@ flowchart LR
 | 业务域 | 分发方（谁） | → 接收方（给谁） | 给什么密钥 | 怎么给/业务场景 |
 |---|---|---|---|---|
 | 收单-终端 | **收单机构**（持 BDK） | → POS/ATM 终端 | 派生的 **IPEK**（BDK 不给，留 HSM） | 终端上线时 KIF 物理注入或 RKL 远程加载（§2.7） |
-| 收单-网络 | **收单机构 与 卡组织/网联** 互相 | ↔ 对方 | **ZMK**(先建)→**ZPK**、**MAC 密钥** | 接入清算时双方建 ZMK，再交换工作密钥 |
+| 收单-网络 | **收单机构 与 卡组织/网联** 互相 | ↔ 对方 | **ZMK**(先建)→**ZPK**、**MAC 密钥** | "先建 ZMK"=先用**人工密钥仪式 或 TR-34**建一把共享区域主密钥(信任根)，**ZPK/MAC 随后用 ZMK 包成 TR-31 传输/轮换**(详见§2.8)。⚠️ 存量机构间至今大量用人工分量仪式建 ZMK，不必默认 TR-34 |
 | 发卡-网络 | **发卡行 与 卡组织/转接** 互相 | ↔ 对方 | **ZMK→ZPK** | 发卡行接入清算 |
 | 发卡-制卡 | **发卡行** | → 卡个人化局/制卡商 | **个人化密钥、EMV 密钥** | 把密钥安全送给制卡方，注入到芯片卡 |
 | 发卡-芯片卡 | **发卡行**（持 EMV 主密钥） | → 芯片卡 | 主密钥派生的 **卡级密钥** | 卡个人化时注入卡的安全芯片 |
@@ -165,6 +167,54 @@ flowchart LR
 - **用途绑定（Key Binding）**：头部用明文标明"这把密钥只能干什么"（如 `P0`=PIN加密、`E0`=EMV、`D0`=数据加密），且 MAC **同时覆盖头部和密钥本体**——改了用途，MAC 就对不上，HSM 拒绝使用。这就堵死了"用途混淆攻击"。
 - **机密性**：密钥本体用 KEK 加密。
 - **完整性**：MAC 保证头部和密钥都没被篡改。
+
+📌 **深挖：用途混淆攻击（Key-Usage Confusion）到底怎么打？**
+
+要理解为什么"用途绑定"是 TR-31 的灵魂，得先看清攻击的根源——它不破解任何算法，只是**钻"密钥没有自带用途"的空子**。
+
+**根源**（回到 §1 内核 "HSM = 带密钥的运算器"）：
+- HSM 对外暴露一堆命令——`加密PIN`、`翻译PIN`、`加密数据`、`解密数据`、`生成MAC`、`派生密钥`……有访问权的人（操作员/连 HSM 的应用/内鬼）能调任意一条。
+- **一把对称密钥本质只是 16/24 字节随机比特**：`PIN 加密密钥` 和 `数据加密密钥` 在比特层面**长得一模一样**，没有任何内在标记说"我只能干 PIN"。
+- 旧的"裸密钥 + KCV"方案里，**KCV 只校验"密钥没传错/没传坏"，根本不携带用途**；用途全靠调用方**外部口头约定**——而约定不是密码学约束，攻击者可以不遵守。
+
+**攻击本质一句话**：同一把密钥，攻击者把 A 命令的输出喂给 B 命令，而 B 吐出的恰好是 A 本想保护的东西。
+
+**经典实例——用 PIN 密钥当"数据解密密钥"，套出明文 PIN**：支付 HSM 里同时有这两条命令（底层都是 3DES/AES）：
+
+| 命令 | 它做什么 | 设计意图 |
+|---|---|---|
+| **加密 PIN**（用 PEK） | `PIN块 = Encrypt(PEK, 明文PIN)` | 输出是**密文**，可安全上网传 |
+| **解密数据**（用"数据密钥"） | `明文 = Decrypt(数据密钥, 任意密文)` | 给应用解密自己的业务数据 |
+
+攻击者有一个**截获的 PIN 块**（本是安全密文）、有 HSM 访问权，但**不知道 PEK 明文**：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant ATK as 攻击者(有HSM访问权,无PEK明文)
+    participant HSM as 支付HSM(忠实执行任意命令)
+
+    Note over ATK,HSM: ❌ 旧方案:用途靠外部约定,密钥比特没绑用途
+    ATK->>HSM: 把 PEK 这串比特声明为"数据解密密钥"
+    ATK->>HSM: 调用[解密数据](PEK, 截获的PIN块)
+    Note over HSM: HSM不知道这把本该"只加密PIN",照算
+    HSM-->>ATK: 返回 Decrypt(PEK,PIN块)=明文PIN
+    Note over ATK: 🔴 持卡人明文PIN泄漏(算法没被破,只是换了条命令)
+```
+
+> HSM 全程都在"正确执行命令"——它不知道这把密钥"本该只加密 PIN、绝不该解密成明文输出"。**没破解任何算法，只是骗 HSM 换条命令用同一把密钥。**
+
+**同类变体**（同一原理）：把和对手方共享的 `ZPK` 重声明成"通信数据密钥"套 PIN；把 `KEK` 当数据密钥用、解出它包过的工作密钥明文；把某 PIN 密钥声明成"可导出/可作 KEK"绕道弄出 HSM。共同点：**密钥的"准用范围"没被密码学锁住，攻击者靠重新标注用途 + 换命令调用来越权。**
+
+**TR-31 怎么堵死**（呼应上面"用途绑定"）：
+1. Header 明文写死 `key_usage`（P0/E0/D0/K0…）+ `mode_of_use`（只准加密/只准解密/只准派生）+ `exportability`——用途从"外部约定"变成"密钥块自带字段"。
+2. **MAC 同时覆盖 Header + 密钥本体**，把"密钥"和"用途声明"绑成不可分割的整体。
+
+于是攻击者改用途时：`改 P0→D0 → Header 变了 → 按(旧Header+密钥)算的 MAC 对不上 → HSM 解包校验失败、直接拒绝`。而他**没法自己重算对的 MAC**——算 MAC 要用 KBPK（即 KEK/ZMK），那把锁在 HSM 里、拿不到明文。
+
+> 🎯 **一句话提炼**：用途混淆攻击 =「**密钥只是一串比特、用途靠外部约定，攻击者换条 HSM 命令就能越权用它、让本该输出密文的密钥反吐明文**」；TR-31 的解法 =「**把用途字段焊进密钥块、再用 KBPK 的 MAC 把"密钥+用途"锁成一体**」——改用途即破坏 MAC，HSM 一律拒绝。这也是 §3.1 "拿 CloudHSM 通用原语拼支付"危险的深层原因之一：**通用 PKCS#11 的密钥属性约束，远不如支付 HSM 的 TR-31 用途绑定严格**。
+>
+> 🔧 *行业公知*：用途混淆/key-casting 是支付 HSM 的经典攻击面，TR-31/X9.143 的用途绑定正是为封堵它而生——以上为成熟机制的教学性讲解。
 
 💡 **业务场景**：总行给分行下发一把新的 PIN 验证密钥、收单机构给发卡行约定一把 ZPK——双方**已经有共享的 KEK**（信任已建立），就用 TR-31 把工作密钥包起来传。这是日常密钥分发的主力格式。
 
@@ -361,9 +411,9 @@ flowchart LR
         CLOUD["AWS Payment Cryptography<br/>Serverless切蛋糕,无存量包袱"]
         CC["Coinbase/Stripe<br/>稳定币/x402另起炉灶"]
     end
-    CARD -.定标准约束.-> KEEP
-    CARD -.也更新标准TR-34/X9.143.-> DISRUPT
-    CLOUD -.挑战硬件生意.-> VENDOR
+    CARD -.->|"定标准约束"| KEEP
+    CARD -.->|"也更新标准TR-34/X9.143"| DISRUPT
+    CLOUD -.->|"挑战硬件生意"| VENDOR
 ```
 
 | 角色 | 核心利益 | 对变革的立场 |
@@ -401,10 +451,36 @@ flowchart TB
 ```
 
 🔧 **三个关键设计**：
-- **终端不存 BDK**：终端只存一个由 BDK 派生的**初始密钥（IPEK）**，加上一个**计数器**。BDK 只在收单机构的 HSM 里。
+- **终端不存 BDK、也不长期存 IPEK**：BDK 只在收单机构 HSM 里；IPEK 注入后被终端用来"播种"一组未来密钥**随即销毁**，终端实际长期持有的是**未来密钥寄存器组 + 计数器**（详见下方"深挖"）。
 - **KSN（Key Serial Number）**：=设备ID + 交易计数器。每笔交易计数器+1，终端据此派生出**唯一交易密钥**，并把 KSN 随报文上送。
 - **收单侧能重算**：收单机构 HSM 拿到 KSN，用 BDK 重新派生出同一把交易密钥来解密——**双方算出同一把密钥，但密钥从不在网络上传输**。
 - **单向不可逆**：派生是单向的——**从第 n 笔的密钥推不出 BDK，也推不出其他笔的密钥**。
+
+📌 **深挖：IPEK 会长期留在终端吗？——"用完即焚 + 未来密钥寄存器 + 前向安全"**
+
+一个高频追问：注入终端的 IPEK 会一直存着吗？**恰恰相反——IPEK 在终端初始化完成的那一刻就被销毁了**。理解这点才算真懂 DUKPT。
+
+**为什么 IPEK 绝不能长期留**（反证其必要性）：IPEK 是派生树的**根**，**能算出这台终端过去和未来的每一把交易密钥**。若它长期留在终端，攻击者撬开终端拿到 IPEK，就能重算历史+未来所有交易密钥、解开抓到的全部 PIN Block——DUKPT 想要的"泄露不扩散"瞬间归零，等于退回"一把固定密钥"。
+
+**终端实际怎么存**（ANSI X9.24 经典 TDES DUKPT）：
+
+```mermaid
+flowchart TB
+    INJ["注入IPEK"] --> SEED["终端用IPEK播种一组<br/>未来密钥寄存器(TDES为21个)"]
+    SEED --> BURN["立即擦除IPEK本身<br/>(从此终端再无IPEK)"]
+    BURN --> STATE["终端长期持有=未来密钥寄存器组+KSN计数器<br/>(无IPEK,无BDK)"]
+    STATE --> TX["每笔:取当前未来密钥派生本笔交易密钥<br/>用完即毁+计数器前进+补充新的未来密钥"]
+    TX -.->|"只能单向往前推"| FWD["反推任何'已用/已删'密钥<br/>密码学上不可行(前向安全)"]
+```
+
+- **终端持有的 = 未来密钥寄存器组 + KSN 计数器**，里面**既没有 IPEK、也没有 BDK**。
+- **前向安全（forward security）**：终端任意时刻的密钥状态**只能往未来推、绝对反推不出任何已用过/已删除的密钥**。
+- **由此得出 DUKPT 真正的安全边界**：撬开一台终端，攻击者只拿到**当前及未来**的密钥状态——**所有历史交易的 PIN 仍然安全**（那些密钥早被删、且推不回来）；这台终端的未来交易会暴露，所以"疑似被攻破即立即停用/换密钥"。损失被关在"**这台终端的未来**"这个最小窗口——呼应本节标题。
+
+**SoftPOS 呢？——不仅 IPEK 不留，连"未来密钥"都尽量不落手机**：传统 POS 至少有 PCI PTS 防篡改安全芯片（SCD）来存未来密钥寄存器、撬开自毁；SoftPOS（普通手机）**没有这个硬件信任根**（§2.7），连未来密钥都没安全的地方存。所以 MPoC 主流做法是把 **DUKPT 派生/PIN 翻译整体搬到云端后端 HSM**——手机只做 PIN-on-COTS 受理 + NFC 读卡，PIN 加密后送后端，**理想架构下手机端根本不长期持有 DUKPT 密钥状态**；即便端上做部分派生，也靠"软件保护五件套 + TEE/SE + 密钥短时效频繁轮换 + 后端 attestation 持续监控"（§2.7.1）把"端上停留时间"压到极短。
+
+> 🎯 **一句话对比**：传统 POS——IPEK 初始化即销毁、端上未来密钥寄存器存于**防篡改硬件**、前向安全护住历史 PIN；SoftPOS——无防篡改硬件、连未来密钥都**尽量不落地**、密钥运算搬**云端 HSM**+短时效+持续 attestation。**共同红线：IPEK（及 BDK）绝不长期留在受理终端。**
+> 🔧 **可信度**：ANSI X9.24 DUKPT 通行机制（公知级）。"IPEK 播种后即擦除、终端维护未来密钥寄存器、前向安全"是 TDES DUKPT 标准设计；AES DUKPT（X9.24-3）派生层级细节不同，但"初始密钥不长期保留+用过即毁+前向安全"原则一致。
 
 💡 **业务场景**：所有线下 POS/ATM 的 PIN 加密标准做法。持卡人在 POS 输 PIN → 终端用本笔 DUKPT 密钥加密成 PIN Block + 带上 KSN → 收单机构用 BDK+KSN 重算密钥解密（再 TranslatePinData 转发给发卡行，见 §4.2）。
 ☁️ Payment Cryptography 支持 TDES 和 AES DUKPT，交易时传 KSN 即可。
@@ -600,6 +676,66 @@ flowchart TB
 > 📌 **一句话**：**AWS Payment Cryptography 用 TR-34 非对称交换替代了传统的人工多方分量密钥仪式**，并托管了 LMK——把"几个人飞到现场录密钥分量"变成 API 调用。安全性等价（甚至更高，无明文暴露），运维大幅简化。
 > 🎯 **交流杀手锏**：支付公司最沉重的密钥运维就是"密钥仪式"（多人到场、双重控制、签字留痕、灾备）。你能说清"AWS 用 TR-34 替代分量仪式 + 托管 LMK，但遗留分量密钥要先本地合成再 TR-34 导入"——既讲清了价值，又诚实点出迁移的真实约束，非常专业。
 
+#### 2.8.1 ZPK 约定好之后，机构到底"怎么存"？
+
+上面讲了 ZPK 怎么**交换/约定**，但还有同一问题的另一半：约定好的 ZPK **落地怎么存**？答案揭示了 §2.1 层级图顶端"LMK 永不出现"在落地时的真正用途。
+
+📌 **第一性红线**：明文 ZPK（和明文 PIN）**绝不能出现在 HSM 之外**（§1 信条 + PCI PIN）。所以——
+
+> **机构从不"存明文 ZPK"**。明文 ZPK 的"家"只有 HSM 内部，且只在做一次 PIN 运算的那几毫秒短暂存在，用完立即从内存抹掉；平时它根本不以明文形式"存"在任何地方。
+
+⚠️ **先校准"数量"——别被"海量"误导**：ZPK/ZMK/MAC 按 §2.2 的"机构安全域边界"建，数量取决于**对手方有多少**：
+- **单个收单行/发卡行**：只和**少数几个网络/对手方**建 zone → **几把~几十把**，谈不上海量。
+- **卡组织/转接清算（星型中心 switch）**：和**它连接的每一家成员机构**都建一对 zone → **几千把 ZMK+ZPK+MAC**，再 × 轮换版本 × 收发方向 × 3DES/AES 并行 → 才真上到万级。
+
+**那这些工作密钥（不管几把还是上万把）存哪？——"外部存密文令牌 + LMK 包裹"**（传统自建 HSM 的业界标准做法）。⚠️ **注意：驱动这个做法的根本不是"密钥多"，而是另外三条更硬的约束**——即便只有 3 把 ZPK 也照样这么存：
+
+```mermaid
+flowchart TB
+    Q["为什么工作密钥要LMK包裹存HSM外?(与数量无关)"] --> R1["①HSM内部安全存储极小<br/>(NVRAM只够放LMK等极少根密钥)"]
+    Q --> R2["②要备份/灾备DR<br/>密钥不能只活在一台设备里,坏了就全丢"]
+    Q --> R3["③HSM集群共享同一LMK<br/>多台才能都解开同一份密文令牌,随交易路由到任意HSM"]
+```
+
+> 📌 **准确说**：外部存"LMK 包裹的密钥令牌"是**支付密钥存储的默认范式，与密钥多少无关**——它由"HSM 内存极小 + 要备份 + 集群共享同一 LMK"三条决定；"密钥可能很多"只是让它**更不可或缺**，不是根因。下面看具体怎么存：
+
+```mermaid
+flowchart LR
+    subgraph DB["普通数据库/密钥库(HSM外,可备份可迁移)"]
+        TOK["密钥令牌 = Enc(LMK, ZPK)<br/>+ KCV + 元数据(对手方/用途/有效期)"]
+    end
+    subgraph HSM["HSM(防篡改硬件)"]
+        LMK["LMK 本地主密钥(永不出设备)"]
+    end
+    APP["应用"] -->|"①取令牌+待处理PIN块递进HSM"| HSM
+    DB --> APP
+    HSM -->|"②HSM内:用LMK解出明文ZPK→翻译PIN→抹掉明文"| HSM
+    HSM -->|"③只返回结果(新PIN块)"| APP
+```
+
+- **数据库里存的是 `Enc(LMK, ZPK)`**——被本机 LMK 加密后的密文，业界叫**密钥令牌（key token / blob）**。它可放普通 DB、可备份、可随应用迁移——因为**没有 LMK（锁死在 HSM 里）就解不开**，拿到令牌也没用。
+- 附存一个 **KCV（Key Check Value）** 识别"这是哪把 ZPK、有没有传错/存坏"，但不泄露密钥本身（§2.3）。
+- 交易时把"令牌+PIN块"递进 HSM，明文 ZPK 只在硬件内运算瞬间存在、用完即抹（呼应 §3.1 明文不出边界）。
+- 📌 **这就是密钥分层的落地意义**：整个 `LMK→KEK/ZMK→ZPK` 里，**只有 LMK 真正"存"在硬件中**；KEK/ZMK/ZPK 全以"被上层密钥加密"的形式存在外部。ZMK（=KEK）同理，只是比 ZPK 更长寿、轮换更少。（用 LMK 直接包 ZPK、还是 `LMK→ZMK→ZPK` 多层包，取决于 HSM 实现，但"外部只存密文、明文根永在硬件"的原则一致。）
+
+**☁️ 在 AWS Payment Cryptography 里——你根本不"存"它，只存一个 ARN**：
+
+```mermaid
+flowchart LR
+    IMP["①ImportKey(TR-31密钥块)导入ZPK"] --> APC["AWS Payment Cryptography<br/>(托管HSM,服务管理的根密钥加密保存ZPK)"]
+    APC -->|"②返回 KeyArn(引用,非密钥)"| YOU["你的应用"]
+    YOU -->|"③DB里只存 KeyArn 字符串"| YDB["你的数据库"]
+    YOU -->|"④交易:TranslatePinData(KeyArn,PIN块)"| APC
+    APC -->|"⑤只返回结果,明文ZPK永不返回"| YOU
+```
+
+- `ImportKey`（TR-31 包裹，§2.3）把 ZPK 导进去 → **AWS 在托管 HSM 里用服务管理的根密钥加密保存**（相当于 AWS 替你扮演了"LMK 包裹+安全存储"角色）。
+- **返回的是 `KeyArn`——一个引用标识符，不是密钥本身**。你 DB 里存的只是这个 ARN 字符串（非秘密，泄露也无法用它解 PIN，调用还要过 IAM 鉴权）。
+- 交易调 `TranslatePinData(KeyArn, PIN块)`，**明文 ZPK 从不返回**（Data Plane 只返回结果，§4.1）。
+
+> 🎯 **一句话对比**：自建 HSM——你存 `Enc(LMK, ZPK)` 密钥令牌在自己 DB、LMK 是你管的根；AWS APC——你只存 `KeyArn` 引用、AWS 替你保管被根密钥加密的 ZPK。**共同红线：明文 ZPK 不写盘、不入库、不留普通内存；落在 HSM 外的永远是密文令牌或引用 ARN。**
+> 🔧 **可信度**："工作密钥外部存储、LMK 包裹成令牌、HSM 内即用即抹"为支付 HSM 通行机制（公知级）；APC 的 `ImportKey→KeyArn`、Data Plane 不返回明文为 AWS 官方设计（§4.1 已据官方文档核实）。
+
 ---
 
 ## 3. CloudHSM vs Payment Cryptography：怎么选
@@ -622,7 +758,7 @@ flowchart TB
 | 管理方式 | Serverless，无需管硬件 | 需管 HSM 集群（选型/扩缩容） | 全托管 |
 | API 风格 | **支付高层语义**（GeneratePinData/VerifyAuthRequestCryptogram） | 标准接口（PKCS#11/JCE/CNG） | AWS API（Encrypt/Decrypt/GenerateDataKey） |
 | 密钥语义 | PIN/EMV/DUKPT/TR-31/34 支付专用 | 标准密钥，无支付语义 | 通用对称/非对称 |
-| 计费 | 按 API 调用次数 | 按 HSM 实例小时 | 按 key + 调用 |
+| 计费 | **按 active key/月 + 按 API 调用** | 按 HSM 实例小时 | 按 key + 调用 |
 | 合规 | **PCI PIN/P2PE/DSS/3DS** | FIPS 140-2 L3 通用 | FIPS 140-2/3 |
 | FIPS | FIPS 140-2 Level 3 | FIPS 140-2 Level 3 | — |
 
@@ -632,6 +768,101 @@ flowchart TB
 - **云内一般数据加密、密钥信封加密**（如加密数据库字段、token vault） → **KMS**。
 
 > 🎯 **交流杀手锏**：支付公司过去自建 HSM 集群（Thales/Futurex/Atalla 物理机），痛点是——贵（一台几十万）、运维难（密钥仪式、双人控制、灾备）、扩容慢、合规审计重。**Payment Cryptography 把这些变成按调用付费的 Serverless API，自带 PCI PIN/P2PE 合规继承**——这是你作为 AWS SA 最有杀伤力的一张牌。但要诚实：存量系统迁移涉及密钥迁移（TR-34 导入）和改造，不是一键切换。
+
+#### 3.0.1 APC 成本模型与边界：什么时候省钱、什么时候要算 TCO
+
+高频追问：**APC 按 key 收费，密钥多了成本不就不可控？** 要分场景，关键看"密钥数量被什么驱动"。
+
+📌 **APC 是两部分计费**：① **活跃密钥存储**（每把 active key 按月计费，单价 ⚠️ 以 [AWS 官方 pricing](https://aws.amazon.com/payment-cryptography/pricing/) 为准、未独立核实）+ ② **密码学运算**（每次 Data Plane 调用计费）。所以成本 = `密钥数量 × 月单价 + 调用量 × 单价`。
+
+```mermaid
+flowchart TB
+    Q["APC按key/月+按调用收费 → 怕key爆炸?"] --> A["✅ 不爆炸:母密钥+派生(§2.1.1)"]
+    Q --> B["⚠️ 会随对手方线性增长:zone类密钥"]
+    A --> A1["BDK几把→几十万POS靠DUKPT派生(不占key)<br/>PVK/CVK/IMK按BIN几把→海量卡靠运算/派生(不占key)"]
+    B --> B1["ZPK/ZMK/MAC:每个对手方(zone)一套"]
+    A1 --> OK["发卡/收单行:key=几十把<br/>存储费可忽略,主要付运算费 → 成本可控"]
+    B1 --> SW["卡组织/转接switch:key上万+超高TPS<br/>per-key+per-call累加重 → 需做TCO对比"]
+```
+
+- **为什么对发卡/收单行可控**（呼应 §2.1.1）：几十万终端、海量卡**不各占一把 key**——靠 DUKPT/EMV **派生**在运算时完成，**派生不创建密钥、不计存储费**。真正占 key 的只有少量母密钥（BDK/PVK/CVK/IMK）+ 几把~几十把 zone 密钥。就算 100 把 active key，存储费也只是 ~百元/月量级，对照自建 HSM 的硬件 capex+仪式运维+PCI 审计，**完全不是一个数量级**——这正是 line 89/§3 杀手锏的财务底气。
+- **什么时候成本变重**（接 §2.8.1 的星型中心）：**卡组织/转接清算/国家级 switch** 连几千家成员行 → 几千个 zone × 轮换/方向/算法并行 → **万级 key**；叠加超高 TPS 的运算费，per-key + per-call 线性累加可能逼近甚至超过"自建 HSM 集群摊销后的单位成本"（自建是固定 capex 摊到海量交易、边际趋零，APC 是线性 opex）。**这类场景必须做 TCO 对比，不能一句"Serverless 更省"带过。**
+- **控成本手段**：① 靠母密钥+派生别给每终端/每卡建 key（头号杠杆）；② 轮换的旧版本密钥在途交易跑完即停用/删除（只有 active key 计费）；③ 清理停用对手方/过期产品的僵尸 key；④ 极端规模可评估混合架构（APC 管语义 + 自建/CloudHSM 兜高频运算）。
+
+> 🎯 **诚实的 SA 判断**：APC 的 per-key+per-call 模型对**绝大多数发卡/收单/PayFac 是省钱的**（省硬件+仪式+审计）；但在**超大规模星型中心**会逼近自建成本临界点——能讲清这个边界，比一味喊"上云更便宜"更专业。
+
+### 3.1 深挖："支付语义"在实现层到底差多少？能不能直接用 CloudHSM？
+
+📌 这是高频追问，也直击"为什么 AWS 要单独做 Payment Cryptography、而不是让你拿 CloudHSM 自己拼"的根子。先把"支付语义"这四个字拆开。
+
+**CloudHSM 给的是密码学原语（primitives）**：通过 PKCS#11/JCE/CNG 暴露 `Encrypt/Decrypt/Sign/Verify/Wrap/Unwrap/GenerateKey`。它只认识两样东西——**密钥**和**算法**（AES/3DES/RSA/HMAC）。它**不认识** PIN Block、不认识"用 KSN 从 BDK 派生交易密钥"、不认识 PVV、不认识 ARQC、不认识 TR-31 密钥块的用途头。
+
+**Payment Cryptography 给的是支付主机命令（host commands）**（它要替代的 Thales payShield / Futurex / Atalla 也是这一类）：一条 `TranslatePinData` / `VerifyAuthRequestCryptogram` 里，**在安全边界内部一次性**编排了"格式化 + 多次原语运算 + 比对"。
+
+> 一句话：**CloudHSM 是"带密钥的通用计算器"，Payment Cryptography 是"带密钥的支付业务机"**。差的不是算力，是**内置在硬件边界里的那层业务编排**。这层差异在实现上的影响分三类，按严重程度排序。
+
+#### 影响①（致命）：合规——明文绝不能出边界
+
+这是 PCI PIN / P2PE 的硬红线（呼应 §1）：**明文 PIN（及明文密钥）绝不能出现在 HSM 之外的内存里**。而支付里几乎所有"语义运算"的本质，都是**在边界内部把一个中间明文消化掉**：
+
+- **PIN 翻译**：`解(ZPK-A) → 中间明文PIN块 → 加(ZPK-B)`，中间那个明文 PIN 块**不能露面**
+- **DUKPT**：`BDK + KSN → 派生交易密钥`，那把派生密钥是明文密钥料，**不能露面**
+- **EMV**：`IMK + PAN/PSN → 卡级密钥 → 会话密钥`，中间两级密钥**不能露面**
+
+而 CloudHSM 的 PKCS#11 是**逐原语调用、每步把结果返回给调用方**的模型。下图对比"拿 PKCS#11 拼 PIN 翻译"与"Payment Cryptography 原子翻译"——差别就在那个中间明文 PIN 块去哪了：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant APP as 应用服务器(普通内存)
+    participant CH as CloudHSM(通用原语)
+    participant PC as Payment Cryptography(支付命令)
+
+    Note over APP,CH: ❌ 用 CloudHSM/PKCS#11 拼 PIN 翻译
+    APP->>CH: C_Decrypt(ZPK_A, encBlock)
+    CH-->>APP: 返回明文PIN块
+    Note over APP: 🔴 明文PIN块此刻在应用内存,已违反 PCI PIN
+    APP->>CH: C_Encrypt(ZPK_B, 明文PIN块)
+    CH-->>APP: 返回新密文块
+
+    Note over APP,PC: ✅ 用 Payment Cryptography 原子翻译
+    APP->>PC: TranslatePinData(ZPK_A→ZPK_B, encBlock)
+    Note over PC: 解→中间明文PIN块→加,全程锁在边界内
+    PC-->>APP: 只返回新密文块(明文从未出边界)
+```
+
+> 📌 **关键**：PKCS#11 里**压根没有一条"原子翻译"指令**能把"解+加"锁在边界内——第一步 `C_Decrypt` 就已经把明文 PIN 块交回应用了。DUKPT 派生、EMV 派生同理：用通用原语拼，必然在某一步把明文密钥/明文 PIN 暴露到应用侧。**CloudHSM 能算出正确结果，但做不到 PCI PIN 合规——能算 ≠ 能用。**
+
+#### 影响②：正确性/工作量——你得自己重写一堆支付标准
+
+就算先不谈合规，"语义"意味着大量**标准化的格式与算法**，PKCS#11 一个都不提供，全得你在应用层重写：
+
+| 语义 | 你要自己实现什么 | 出错后果 |
+|---|---|---|
+| **PIN** | ISO 9564 PIN Block 格式化（Format 0/1/3/4，与 PAN 做 XOR、AES 的 128-bit 块） | 格式错一位 → PIN 校验全错 |
+| **DUKPT** | ANSI X9.24 派生树（KSN 计数器 → 逐级派生），3DES/AES DUKPT 两套 | 派生算错 → 整批终端解不出 PIN |
+| **EMV** | 卡级密钥派生（Visa/MC 的 Option A/B）、会话密钥、ARQC 报文拼装与填充、ARPC 生成 | 验证逻辑错 → 真卡被拒/假卡被放 |
+| **TR-31** | 解析头部、校验覆盖"头+密钥"的 MAC、强制用途绑定 | 用途绑定丢失 → 密钥用途混淆攻击复活（§2.3） |
+| **TR-34** | RSA 信封 + CMS/X9.143 封装的首次密钥分发 | 建信流程错 → 跟对手方根本换不上密钥 |
+
+这些都是**边界条件极多、错一点就资金/安全出问题**的标准。Payment Cryptography 把它们做进固件并通过了 PCI 认证；你拿 CloudHSM 等于**自建一套未经认证的支付固件**——恰恰是 §1 信条"资金正确性 > 一切"最不该 DIY 的地方。
+
+#### 影响③：互操作——生态只说 TR-31/TR-34/PIN-Block 这门"方言"
+
+终端、收单、卡组织、发卡行之间换密钥/传 PIN，**线上格式就是** TR-31/TR-34、ISO PIN Block。对手方甩给你一个 TR-31 块，CloudHSM **不会原生导入**——你得自己写 parser+importer 才能落到 HSM 里，§2.2 那条"终端→收单→卡组织→发卡行"链上每个机构边界都要手搓适配器。Payment Cryptography 的 `ImportKey/ExportKey` 直接吃 TR-31/TR-34。
+
+#### 直接回答："CloudHSM 能支持 PIN 转加密吗？直接用会怎样？"
+
+📌 **能不能做 PIN 转加密**：
+- **密码学层面**：能。`解ZPK-A → 加ZPK-B` 这点 3DES/AES 运算它当然做得了。
+- **PCI-PIN 合规的原子翻译**（明文 PIN 块全程不出边界）：**用标准 PKCS#11 做不到**——中间明文 PIN 块必然被返回应用侧，没有 `TranslatePin` 这种主机命令。这正是行业历史上要给 HSM 灌**支付固件**（payShield host commands、Atalla AKB）的原因。
+- ⚠️ **而 AWS CloudHSM 是通用 HSM（Marvell LiquidSecurity 一类），不开放自定义支付固件加载**——所以在 AWS 上这条路是堵死的，这也是 AWS 单独做 Payment Cryptography（而非包装 CloudHSM）的根本原因。
+
+📌 **直接用 CloudHSM 会怎样**——卡在三个坎：① **过不了 PCI PIN/P2PE**（明文 PIN/密钥被迫出边界）；② **得自建并自证一套支付密码学**（ISO 9564 / X9.24 / EMV / X9.143），高风险高成本；③ **跟生态对接处处手搓 TR-31/34 适配器**。结论不是"不能算"，而是**"算得出但用不了、合规过不去、还贵在人力"**。
+
+> 🎯 **一句话提炼（可直接对客户讲）**：Payment Cryptography ≈ **CloudHSM 级硬件 + 支付固件 + 用途绑定的支付密钥类型 + 现成的 PCI 合规背书**。"支付语义"省掉的不是几行代码，是**一整套合规边界保证 + 标准实现 + 生态互操作**——这三样恰好是支付里你最不想自己背的。
+>
+> 🔧 *行业公知*：PKCS#11 无 DUKPT 派生 / PIN 翻译 / TR-31 语义；PCI PIN 要求明文 PIN 不出边界。CloudHSM 为通用 FIPS 140-2/3 HSM、不开放支付固件加载——以上为成熟机制的教学性讲解，未逐条引用一手文档。
 
 ---
 
@@ -702,7 +933,69 @@ TranslatePinData(
 → 返回:用发卡行密钥重新加密的 PIN Block
 ```
 
+📌 **先确认一个常见理解：APC 没改变"做什么"，只改变了"边界"。** PIN 翻译的三步——①用入向密钥解出明文 PIN 块 →②（可能换格式）→③用出向密钥重新加密——在自建 HSM 时代和 APC 里**完全一样**。区别只在：
+
+| | 自建 HSM 时代 | APC（`TranslatePinData`） |
+|---|---|---|
+| 做的事 | 解→（换格式）→重新加密 | **同样三步，一字不差** |
+| 谁编排 | 你的应用逐条调 HSM 主机命令、管密钥/参数 | 调**一个原子 API** |
+| 明文 PIN 在哪 | 只在 HSM 硬件内一闪而过（⚠️**前提：用原子翻译命令**，见下方贴士） | 只在 APC 托管 HSM 内一闪而过（`TranslatePinData` 即原子命令） |
+| 本质 | 你管 HSM 集群/密钥/合规 | **AWS 把"应用编排+HSM 运算"圈进托管边界**，并附带 PCI 合规（§3.1） |
+
+> 所以"APC 只是把应用和 HSM 要做的事圈进去了，做的事一样"——**正是如此**。价值不在算得不同，而在把"那条本会泄露明文 PIN 的多步编排"压成一个锁在边界内的原子命令（§3.1）。
+
+🔧 **那几个字段是什么、为什么需要**：根本事实是——**一个加密 PIN 块光有密文解不开也用不对，必须同时告诉 HSM 三件元数据**：①用**哪把密钥**解 ②密文是**什么格式**封的 ③解开后**和哪个 PAN（卡号）**绑定。Translate 是"入向解开"和"出向重封"各要这套，故字段成对：
+
+```mermaid
+flowchart LR
+    subgraph IN["入向 Incoming:怎么解开终端来的PIN块"]
+        I1["EncryptedPinBlock<br/>(终端来的密文)"]
+        I2["IncomingKeyIdentifier<br/>(用哪把密钥解)"]
+        I3["IncomingTranslationAttributes<br/>(什么格式+PAN)"]
+    end
+    IN --> MID["HSM内部:解出明文PIN块<br/>(一闪而过,不出边界)"]
+    MID --> OUT["出向 Outgoing:怎么重新封装发给发卡行"]
+    subgraph OUT2["OutgoingKeyIdentifier + OutgoingTranslationAttributes"]
+        O1["用新密钥(发卡行ZPK)重新加密"]
+        O2["按下一跳要求的新格式封装"]
+    end
+    OUT --> OUT2 --> RES["新密文PIN块(换了锁+换了格式)"]
+```
+
+| 字段 | 是什么 | 用途 / 关键点 |
+|---|---|---|
+| **`IncomingKeyIdentifier`** | 解开终端 PIN 块用的密钥（APC 里给 **KeyArn 引用**，非明文，§2.8.1） | 告诉 HSM"用哪把锁开门"。⚠️ **DUKPT 时**（§2.6）入向不是固定密钥，而是 **BDK 的 KeyArn + 本笔 KSN**——HSM 用 BDK 按 KSN **现场派生**这笔交易密钥来解，派生在 HSM 内完成、不另占 key（§2.1.1） |
+| **`IncomingTranslationAttributes`** | 入向 PIN 块的**格式**：ISO 9564 Format 0/1/3/4（Format 0/3/4 还要带 **PAN**） | HSM 必须按正确格式+正确 PAN 才能反解出明文 PIN（这些格式把 PIN 与 PAN 做过 XOR 运算）。给错→解出垃圾。这就是 §3.1 说的"ISO 9564 格式化语义"，PKCS#11 没有、得自己写 |
+| **`OutgoingKeyIdentifier`** | 重新加密、发给下一跳用的密钥（通常是和发卡行约定的 **ZPK 的 KeyArn**，§2.2 链上下一跳） | 告诉 HSM"用哪把新锁锁门"。**"翻译/换锁"换的就是 `Incoming…`→`Outgoing…` 这两把密钥** |
+| **`OutgoingTranslationAttributes`** | 出向 PIN 块的目标**格式**（同样 Format 0/1/3/4 + 可能的 PAN） | 下一跳要求的格式常和入向不同，HSM 重新加密时**顺便换格式**——所以 Translate **一次同时完成"换密钥+换格式"** |
+
+> 📌 **为什么要换格式**：历史上不同设备/网络用不同 ISO PIN Block 格式——Format 0（最老，PIN⊕PAN）、Format 1（不绑 PAN，用于无 PAN 场景）、Format 3、Format 4（AES 时代 128-bit 块）。链路每一跳可能要求不同格式，所以翻译时既换密钥也对齐格式。
+>
+> 🎯 **一句话串起来**：入向三件套（`IncomingKeyIdentifier`+`IncomingTranslationAttributes`+密文）让 HSM **正确解出明文 PIN**；出向两件套（`OutgoingKeyIdentifier`+`OutgoingTranslationAttributes`）让 HSM **用新密钥、新格式重新封装**。明文 PIN 只在这两步之间、HSM 硬件内一闪而过——**这就是"应用编排+HSM 运算"被原子化进 APC 的全部内容**。
+>
+> ⚠️ 字段名以 [Payment Cryptography API Reference](https://docs.aws.amazon.com/payment-cryptography/) 为准；此处含义为机制性讲解（🔧 公知级 + 官方字段语义）。
+
 > 📌 **关键点**：终端常用 **DUKPT**（一次一密），所以入向是 BDK+KSN 派生；出向是和发卡行约定的 ZPK。PIN Block 还有**格式转换**（ISO Format 0/1/3/4），不同节点要求不同格式，Translate 同时换密钥+换格式。
+
+📌 **深挖：明文 PIN 的两个合法硬件边界——永不进应用内存**
+
+上面说"明文 PIN 只在 HSM 内一闪而过"，要补一个**前提**：这不是"自建 HSM 自动给的"，而是**靠"用 HSM 的原子翻译命令"实现的**。
+
+- ✅ **正确写法（原子翻译）**：应用调一条 `Translate PIN` 主机命令（payShield/Atalla 的 host command，或 APC 的 `TranslatePinData`），把"解→换格式→重新加密"全锁在 HSM 内 → 应用**只见密文进、密文出**，明文 PIN 真的不出硬件。
+- ❌ **错误写法（拆开调，PKCS#11 反模式）**：`明文 = Decrypt(入向密钥, 密文)` → 🔴 **第一步一返回，明文 PIN 就落到应用内存里了**，违反 PCI PIN。这正是 §3.1 论证"通用 HSM/CloudHSM 过不了 PCI PIN"的根本原因。
+
+📌 **PCI 红线**：明文 PIN 只允许存在于**安全密码设备（SCD）的硬件边界内**，绝不能进通用服务器/应用内存。它一生中合法出现的地方只有**两个安全硬件边界**：
+
+```mermaid
+flowchart LR
+    PED["①PIN输入设备(PED/EPP加密键盘)<br/>持卡人按键的一刻=带安全芯片的SCD<br/>芯片内立即加密成PIN块"] -->|"全程密文上网"| NET["网络/POS应用/收单应用<br/>(只有密文)"]
+    NET --> HSM["②HSM<br/>翻译/验证时硬件内解开一瞬"]
+    PED -.->|"明文PIN从不进"| X["❌ 通用服务器/应用内存"]
+    HSM -.->|"明文PIN从不进"| X
+```
+
+> 🎯 **一句话**：明文 PIN 只活在**输入端的加密键盘（SCD）** 和 **运算端的 HSM** 这两个安全硬件里，中间所有环节（POS 应用/网络/收单/清算）全程只有密文。"自建 HSM 明文不出边界"成立的前提是**用了原子翻译/验证命令**；一旦有人用"先解密再加密"的拆分写法，明文就漏进了应用内存——这也是 §3.1 说通用 HSM 过不了 PCI PIN 的根因。
+> 🔧 *可信度*：SCD/PED 隔离、原子主机命令为支付安全通行机制（公知级）；具体 PCI 认定以 PCI PTS/PIN 标准与 QSA 评估为准。
 
 ---
 
@@ -815,6 +1108,39 @@ flowchart TB
 | 卡号(PAN)隔离处理 | Nitro Enclaves | — |
 | token↔PAN 映射 | DynamoDB + KMS | — |
 | 通用密钥/PKI | CloudHSM | PKCS#11 |
+
+#### 4.5.1 为什么"卡号(PAN)"要 Nitro Enclaves，而不是塞进 HSM？
+
+上面整篇讲的 HSM/Payment Cryptography 都在保护 **PIN 和密钥**；而 `Nitro Enclaves 隔离卡号处理` 管的是**另一类数据——卡号(PAN)本身**。两者是不同的安全问题，需要不同工具。
+
+📌 **PIN 与 PAN 的安全模型不同**：
+
+| | PIN | 卡号 PAN |
+|---|---|---|
+| 本质 | 一个**只做密码学运算**的秘密 | 一个**要被业务逻辑反复读写**的标识符 |
+| 怎么用 | 永远密文进密文出，明文只在 HSM 内一闪（§4.2） | 要拿明文 PAN 去**BIN路由/对账/风控/调发卡行接口/生成 token** |
+| 适合工具 | **HSM / Payment Cryptography**（只做运算，明文不出边界） | ❌ HSM 不合适——总不能把路由/对账/风控塞进 HSM 跑 |
+
+> **矛盾点**：PAN 必须**以明文被业务应用处理**（不像 PIN 可全程密文），但明文 PAN 又是 PCI-DSS 最高保护对象。HSM 解决不了"明文 PAN 在哪里被业务安全处理"——**这正是 Nitro Enclaves 的场景**。
+
+📌 **Nitro Enclaves = 从 EC2 切出的、连运维都进不去的隔离飞地**：无网络、无 SSH、无持久存储，和父实例只能走本地 `vsock`；**root/运维也读不到飞地内存**（硬件级隔离）；靠 **KMS Attestation** 证明"我是未被篡改的特定代码飞地"，KMS 才放解密 PAN 的数据密钥给它。
+
+```mermaid
+flowchart LR
+    subgraph EC2["一台EC2(父实例,跑业务)"]
+        APP["业务应用(只见token/密文PAN)"]
+        ENC["Nitro Enclave飞地(明文PAN只在这出现)"]
+    end
+    APP -->|"vsock本地通道(无网络/无SSH)"| ENC
+    ADMIN["运维/SSH/SSM"] -.->|"❌ 读不到飞地内存"| ENC
+    ADMIN -->|"✅ 能登父实例"| APP
+    ENC -->|"密文PAN存"| VAULT["Token Vault DynamoDB+KMS"]
+```
+
+**典型场景=Tokenization 取真卡号**：业务层大部分只用 token；需要真 PAN 时，把"从 Vault 取密文 PAN → 飞地内用 KMS 密钥解出 → 飞地内完成那件事(调发卡行/生成网络令牌/BIN路由) → 明文随飞地内存释放消失"整段关进飞地。**价值**：① 明文 PAN 只在"运维看不见"的小飞地出现；② **大幅缩 PCI scope**（其余服务只碰 token，审计范围从"整个系统"缩成"飞地+vault"）；③ 防"明文 PAN 被运维/被入侵进程窃取"这类 HSM 覆盖不到的内部威胁。
+
+> 🎯 **三者分工一句话记住**：**PIN/密钥运算→Payment Cryptography/HSM**（明文不出硬件）；**明文 PAN 业务处理→Nitro Enclaves**（明文只在飞地、处理完即消失）；**包裹 PAN 密文的数据密钥→KMS**（attestation 只放给可信飞地）。这就是架构表"数据/合规"栏的完整方案：**PIN 给 HSM、PAN 给 Enclave、密钥给 KMS，各守一类数据**。这也解释了为什么 `Nitro Enclaves` 放在"数据/合规"栏、而不是和 `TranslatePinData` 放一起。
+> 🔧 *可信度*：Nitro Enclaves 隔离特性（无网络/无SSH/运维不可读/KMS attestation）为 AWS 官方设计；"用 Enclave 处理明文 PAN 缩 PCI scope"是 AWS 令牌化场景标准范式；具体 PCI 认定以 QSA 评估为准。
 
 ---
 

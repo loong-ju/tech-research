@@ -892,7 +892,7 @@ flowchart TB
 - **业务全景回顾** → `01-cards-business.md`
 - **线上受理入口（支付网关）与第三方支付** → 模块2 `02-epayment-tech-aws.md`
 - **合规深入**（KYC/KYB/AML/PCI 体系化）→ 模块6 横向专题
-- **跨境技术** → `跨境支付深度研究报告.md` 与模块3
+- **跨境技术** → 模块3 `03-crossborder-tech-aws.md` + `03-crossborder-business.md`
 
 ---
 
