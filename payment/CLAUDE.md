@@ -97,9 +97,7 @@ python3 _mdserver.py 8080     # 指定端口
 ## 四、当前内容索引
 
 ### traditional-payment/ — 传统/跨境支付
-- `跨境支付深度研究报告.md` — 带引用的完整研究报告（G20路线图、各清算系统、新兴技术、中国出海，附来源清单）
-- `跨境支付学习笔记.md` — 第一性原理学习骨架（一条主线 + 四套管道对比 + 10道自测题）
-- `跨境支付架构图.html` — 6张 Mermaid 可视化架构图（自包含网页）
+> 跨境支付以 `03-crossborder-business.md`（业务篇·总入口）为核心，已整合原"学习笔记+架构图+深度研究报告"三份材料（第一性四套管道骨架、可视化图、G20 量化目标、新兴技术、引用来源清单见其附A）。配套：`03-crossborder-tech-aws.md`（技术）、`03b-...deepdive.md`（收款全链路）、`03c-crossborder-players/`（企业画像）。卡/电子支付见 `01-*`/`02-*`。
 
 ### stable-coin/ — 稳定币
 - `stablecoin_research.md` — 稳定币研究
