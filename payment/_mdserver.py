@@ -76,6 +76,23 @@ body{{margin:0;font-family:-apple-system,"Microsoft YaHei UI",Arial,sans-serif;c
 </div>
 <script>
 mermaid.initialize({{startOnLoad:false,theme:'neutral'}});
+// 侧栏手风琴:同级目录互斥——展开一个,自动收起同级其他(及其所有子级)
+(function(){{
+  const side=document.getElementById('side');
+  if(!side) return;
+  side.querySelectorAll('details>summary').forEach(sm=>{{
+    sm.addEventListener('click',function(){{
+      const d=sm.parentElement;
+      // 即将展开时(当前是关闭态),收起同级其他 details
+      if(!d.open){{
+        const parent=d.parentElement;
+        parent.querySelectorAll(':scope>details[open]').forEach(o=>{{
+          if(o!==d){{ o.open=false; o.querySelectorAll('details[open]').forEach(x=>x.open=false); }}
+        }});
+      }}
+    }});
+  }});
+}})();
 const raw = document.getElementById('rawmd');
 if(raw){{
   marked.setOptions({{breaks:false,gfm:true}});
