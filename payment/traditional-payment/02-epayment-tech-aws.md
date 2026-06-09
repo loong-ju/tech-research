@@ -248,7 +248,7 @@ flowchart TB
 ## 7. 通向下一层
 
 - **业务全景回顾** → `02-epayment-business.md`
-- **跨境电子支付：多币种/换汇/SWIFT** → 模块3 与 `跨境支付深度研究报告.md`
+- **跨境电子支付：多币种/换汇/SWIFT** → 模块3 `03-crossborder-business.md` + `03-crossborder-tech-aws.md`
 - **链上账本（绕开所有中介的极致）** → 模块4（稳定币）
 - **账务/对账/非功能性深入** → 模块6 横向专题
 
