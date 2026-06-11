@@ -189,9 +189,11 @@ sequenceDiagram
 
 ## 8. 通向下一层
 
-- **跨境支付四套管道/代理行电汇/SWIFT** → `03-crossborder-business.md`
-- **跨境电商收款七环节全链路（货款怎么回国）** → `03b-crossborder-collection-deepdive.md`
-- **电商支付场景（买家付/卖家收）** → `02b-ecommerce-payment.md`
+> 🗺️ **本篇是上游**：本篇讲"为什么有这笔跨境钱、怎么结算"；**接下来看下游"这笔钱怎么收回国"**（业务逻辑序 03→03d→本篇→03b，见 `03-crossborder-business.md §18.0`）。
+
+- **▶ 下游：跨境收款七环节全链路（货款怎么从海外买家回到中国卖家）** → `03b-crossborder-collection-deepdive.md`
+- **跨境支付四套管道/代理行电汇/SWIFT（总纲）** → `03-crossborder-business.md`
+- **电商支付场景（买家付/卖家收，零售侧上游）** → `../e-payment/02b-ecommerce-payment.md`
 - **跨境收款企业画像/牌照** → `03c-crossborder-players/`（连连见 `lianlian.md`）
 
 ---
