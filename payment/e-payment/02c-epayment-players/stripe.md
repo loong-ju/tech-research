@@ -55,7 +55,7 @@ xychart-beta
 
 ## 4. 牌照与资质（逐法域：牌照类型+业务范围+怎么开展+合规）📌
 
-> 🔑 **术语不懂先看**：MTL/EMI/MSB/NMLS/passporting/FBO 等牌照术语+"持牌支付机构如何挂靠银行碰钱"的通用机制，见 `支付牌照术语速查.md`。
+> 🔑 **术语不懂先看**：MTL/EMI/MSB/NMLS/passporting/FBO 等牌照术语+"持牌支付机构如何挂靠银行碰钱"的通用机制，见 `支付术语速查.md`。
 > 💡 **找牌照的替代办法**(主页 stripe.com/legal/licenses 常 404，但这些可达/可查)：① **SPC 子页 stripe.com/legal/spc/licenses**(列约 50 法域监管机关+NMLS#) ② **Bridge bridge.xyz/legal**(稳定币逐州证号最全) ③ **NMLS Consumer Access**(查各州证号) ④ **FCA Register / 爱尔兰央行 registers.centralbank.ie**(查 EMI 号) ⑤ **docs.stripe.com**(各产品合规/银行合作页)。**牌照是公开监管事实，不靠官网披露**。
 
 📌 **总体结构**：Stripe 把"持牌"分散在不同法人实体，**自持支付类牌照(MTL/EMI)打底 + 需银行牌照的功能(存款/发卡/放贷)统统挂靠合作银行**。
@@ -75,7 +75,7 @@ xychart-beta
 
 ### 4.2 Stripe 怎么开展业务：逐场景运作流程 📌docs
 
-🔑 **总原则**(详见 `支付牌照术语速查.md`)：**收单+平台分账=自持牌照(MTL/EMI)直接做；存款/发卡/放贷等需银行牌照的功能=挂靠合作银行，Stripe 只做账本+指令+合规层**。下面用 4 个核心场景讲清"一笔钱具体怎么走、谁碰钱、Stripe 干什么"。
+🔑 **总原则**(详见 `支付术语速查.md`)：**收单+平台分账=自持牌照(MTL/EMI)直接做；存款/发卡/放贷等需银行牌照的功能=挂靠合作银行，Stripe 只做账本+指令+合规层**。下面用 4 个核心场景讲清"一笔钱具体怎么走、谁碰钱、Stripe 干什么"。
 
 **场景① 基础收单(一个商户直接收卡)**：Stripe 自持牌照+卡组织通道直接做
 > ⚠️ **这是线上收单(CNP,卡不在场)，不是线下 POS 刷卡**——入口是电商/App 的**结账页**(手输卡号/数字钱包)，是 Stripe 起家+主业+绝大部分 TPV。线下 POS(插卡/挥卡/Tap to Pay)是另一条产品线 **Stripe Terminal**(见 §6)，非主战场。这正是 Stripe(起家线上 API)与 Block(Square)/银联商务/拉卡拉(起家线下 POS)的根本区别。
@@ -131,7 +131,7 @@ flowchart LR
 
 > 💰 **追问"消费者刷卡的钱，第一站进谁的银行账户？"——答案是 FBO 账户，不是商家账户**📌。这是 PayFac 模式最反直觉的一点，务必厘清：
 >
-> - **FBO（For Benefit Of）账户是什么**：Stripe **以自己名义、在合作银行**（如 Fifth Third）开的一个**资金归集/托管账户**，里面的钱"名义归 Stripe 管、实际受益权属于底下商户/卖家"——本质是个**为客户代持资金的池子**（详见 `支付牌照术语速查.md`）。它就是 PayFac"代收资金"那笔钱**物理落地的地方**。
+> - **FBO（For Benefit Of）账户是什么**：Stripe **以自己名义、在合作银行**（如 Fifth Third）开的一个**资金归集/托管账户**，里面的钱"名义归 Stripe 管、实际受益权属于底下商户/卖家"——本质是个**为客户代持资金的池子**（详见 `支付术语速查.md`）。它就是 PayFac"代收资金"那笔钱**物理落地的地方**。
 > - **资金两段式，商家账户是第二站**：
 >
 > ```mermaid
@@ -201,7 +201,7 @@ flowchart LR
 - **Treasury**：账户是 **Fifth Third Bank N.A. 名下的 FBO(stored-value)账户**，FDIC pass-through，⚠️ **Stripe 非银行**——只做项目管理+资金转移(SPC)。
 - **Capital**：基于 Stripe 商户流水数据授信，但**放贷经合作行**(常见说法 YouLend/Celtic，⚠️未官方核实)，Stripe 提供数据风控技术。
 
-> 🎯 **一句话总结**：**场景①②(收单/分账)Stripe 凭自有 MTL/EMI 直接做、自担合规；场景③④(发卡/存款/放贷)需银行牌照→挂靠 Celtic/Cross River/Sutton/Fifth Third 等，Stripe 只做技术+项目+数据风控层**。所有场景里"碰钱+最终结算"都在银行轨道，Stripe 是账本+指令+合规层(呼应 `支付牌照术语速查.md` 核心模型)。
+> 🎯 **一句话总结**：**场景①②(收单/分账)Stripe 凭自有 MTL/EMI 直接做、自担合规；场景③④(发卡/存款/放贷)需银行牌照→挂靠 Celtic/Cross River/Sutton/Fifth Third 等，Stripe 只做技术+项目+数据风控层**。所有场景里"碰钱+最终结算"都在银行轨道，Stripe 是账本+指令+合规层(呼应 `支付术语速查.md` 核心模型)。
 
 ### 4.3 合规要求 📌
 - **AML/KYC/制裁**：美国 MSB 受 BSA 约束(KYC/KYB+UBO≥25%识别、交易监测、SAR/CTR、OFAC 筛查、记录留存≥5年)；Connect 按国别核验(新加坡 PSA Singpass+未核验 120 天关户、巴西 BCB 3978/20、美国 payout 阈值 $600/$3k/$10k/$500k SSN)

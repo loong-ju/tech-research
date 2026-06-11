@@ -17,7 +17,7 @@
 | `stable-coin/` | **稳定币** | USDC/USDT/PYUSD/RLUSD、链上跨境清算、稳定币合规、CBDC/mBridge 等 |
 | `agentic-payment/` | **智能体支付** | AI Agent 支付协议(Google UCP/AP2、OpenAI×Stripe ACP、Amazon、Coinbase x402、Visa TAP、Mastercard Agent Pay)、agentic commerce、欺诈风控、相关素材与演示 |
 
-> 🗂️ **跨模块通用文件放根目录**：如 `支付牌照术语速查.md`（牌照术语，被 e-payment/crossborder-payment 多处引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。模块0 地基在 `_foundation/`，横向专题(风控/合规/账务/NFR)在 `_topics/`。
+> 🗂️ **跨模块通用文件放根目录**：如 `支付术语速查.md`（牌照术语，被 e-payment/crossborder-payment 多处引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。模块0 地基在 `_foundation/`，横向专题(风控/合规/账务/NFR)在 `_topics/`。
 
 **新建研究内容时**：先判断属于哪个维度，放入对应子目录；跨维度/跨模块的综合内容放主目录根。
 
@@ -110,7 +110,7 @@ python3 _mdserver.py 8080     # 指定端口
 > 以 `03-crossborder-business.md`（业务·总入口·四套管道骨架）为核心。配套：`03-crossborder-tech-aws.md`（技术·SWIFT/ISO20022/制裁筛查+AWS）、`03b-crossborder-collection-deepdive.md`（跨境收款七环节全链路+合规）、`03d-trade-settlement.md`（**跨境贸易模式与结算方式**：T/T/L-C/D-P/O-A+中国海关监管方式，经 deep-research 核查）、`03c-crossborder-players/`（企业画像，含 lianlian.md）。
 
 ### 根目录跨模块文件
-> `支付牌照术语速查.md`（MTL/EMI/MSB 等牌照速查，被 e-payment/crossborder-payment 引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。
+> `支付术语速查.md`（MTL/EMI/MSB 等牌照速查，被 e-payment/crossborder-payment 引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。
 
 ### stable-coin/ — 稳定币
 - `stablecoin_research.md` — 稳定币研究
