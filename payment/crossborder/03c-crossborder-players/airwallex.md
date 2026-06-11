@@ -39,8 +39,8 @@
 | **荷兰/EEA** | Airwallex (Netherlands) BV | **EMI**(2021-05，EEA passporting) | 荷兰 DNB |
 | **英国** | Airwallex (UK) Ltd | EMI/支付机构 | FCA |
 | **新加坡** | Airwallex (Singapore) | 主要支付机构 MPI | MAS |
-| **香港** | Airwallex (HK) Ltd | 货币服务经营者 MSO | 香港海关 |
-| **美国** | Airwallex US, LLC | FinCEN MSB + 各州 MTL | 各州/FinCEN |
+| **香港** | Airwallex (HK) Ltd | 货币服务经营者 **MSO 16-09-01929**(📌证号已核查) | 香港海关 |
+| **美国** | Airwallex US, LLC | FinCEN MSB + 各州 MTL（**NMLS #1928093**，约 45 州，📌已核查）；合作行 **Evolve Bank & Trust(FDIC)** | 各州/FinCEN |
 | **加拿大** | Airwallex (Canada) | MSB | FINTRAC |
 | **马来西亚** | Airwallex (Malaysia) | 2021-09 获牌 | BNM |
 | 新西兰/以色列 | 各本地实体 | — | — |
@@ -48,6 +48,9 @@
 | 日本 | 2025-11 完成注册 | 资金移动业相关 | — |
 | 墨西哥/韩国 | MexPago(2023收购)/Paynuri(2026收购) | 本地资质 | — |
 - ⚠️ "约 80 项"逐项归属未穷举，需查 ASIC/DNB/FCA/MAS/NMLS/FINTRAC 等名录
+
+> 💰 **资金落点📌已核查（Airwallex 香港用户协议明文，强证据）**：客户资金**第一站进 Airwallex 自己名下的底层银行账户、与其他用户资金混同合并（commingled and pooled）**；协议定性"**beneficially ours, not held on trust**"（受益意义归 Airwallex、不为客户设信托、客户无利息）；**Global Account 是虚拟账户、非客户名下银行账户**、不受香港存款保障计划保护（Airwallex 非银行）。美国端经合作行 Evolve Bank & Trust 的 sponsor-bank 模式。
+> 🎯 这正面坐实了"跨境收款=钱先进收款商归集账户、非卖家名下"的资金流本质（呼应 `epayment/02b §5.4`、`01 §4.6`）。⚠️ 除港协议外各家具体 FBO/safeguarding 结构、到账周期/费率仍未核实。
 
 ## 5. 定位与商业模式（收入结构）📌Sacra/FXC 二手
 - **收入结构**(Sacra)：跨境支付 ≈ **60%**(服务初创/marketplace 如京东)、全球账户产品 ≈ **40%**；另口径"约 60% 收入来自 API/嵌入式产品"(与前者有重叠归类)

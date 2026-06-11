@@ -5,7 +5,7 @@
 > **前置**：模块1 `01-cards-business.md`（四方模型/收单产业链/推拉/PayFac）、模块2 `02-epayment-business.md`（网关/第三方支付/钱包）；企业画像见 `02c-epayment-players/stripe.md`、`03c-crossborder-players/`。
 > **组织方式**：top-down——全景 → 买家侧 → 卖家侧 → 撮合层 → 场景矩阵 → 完整链路。零散追问见末尾 FAQ。
 > 标注：🔧 行业公知 · 📌 已核查·一手 · ⚠️ 告诫/坑点 · 🎯 交流要点
-> ⚠️ **可信度总则**：本篇支付方式分类骨架、钱包两种资金底座（含 PayPal/Cash App=储值、Shop Pay/Link=凭证型的具体归类）、Apple Pay/Amazon Pay 机制、Stripe Connect 三种收款模型与到账周期、即时支付清算结算模型/标准/网络、**BNPL 资金流（下单垫付全额+自担信用风险）**，均经 **deep-research 对抗式核查、引 Stripe/BIS/CPMI/美联储/ECB/TCH/NPCI/SEC 招股书等一手来源**（标 📌，来源见末尾附A）；**仍待核**：BNPL 的 MDR 具体百分比区间、巴西 PIX 细节、即时支付别名寻址机制、**跨境收款商（连连/PingPong/Airwallex/Payoneer）资金落点与逐法域牌照**——标 ⚠️ 待核，写正式材料请二次核实。
+> ⚠️ **可信度总则**：本篇支付方式分类骨架、钱包两种资金底座（含 PayPal/Cash App=储值、Shop Pay/Link=凭证型的具体归类）、Apple Pay/Amazon Pay 机制、Stripe Connect 三种收款模型与到账周期、即时支付清算结算模型/标准/网络、**BNPL 资金流（下单垫付全额+自担信用风险）**，均经 **deep-research 对抗式核查、引 Stripe/BIS/CPMI/美联储/ECB/TCH/NPCI/SEC 招股书等一手来源**（标 📌，来源见末尾附A）；**跨境收款商资金落点与逐法域牌照**经第四轮核查升级为 📌（Airwallex 港协议明文"混同/受益归己/虚拟账户"+ Payoneer 爱尔兰 EMI/PingPong 英国 EMI 经监管名册确认）；**仍待核**：BNPL 的 MDR 具体百分比区间、巴西 PIX 细节、即时支付别名寻址机制、跨境收款商**到账周期/费率档位**——标 ⚠️ 待核，写正式材料请二次核实。
 
 ---
 
@@ -325,7 +325,17 @@ flowchart TB
 
 📌 **Stripe Connect 代平台承担与支付相关的合规义务**，依托自有牌照——**美国 MTL + 欧盟 EMI**，执行 KYC/AML 与禁止业种/MATCH 名单筛查（来源：Stripe Connect 页 + 爱尔兰央行对 Stripe Technology Europe 授权 ref C187865 + Stripe 牌照页，附A[10][14][15]）。⚠️ 承担程度随账户类型（Standard/Express/Custom）而异（见 stripe.md §4.2）；用户自身商品/主体合规仍归用户。
 
-> 🔑 **跨境收款商（连连/PingPong/Airwallex/Payoneer）的"钱第一站"与各法域牌照**：⚠️ **两轮 deep-research 均未取得幸存一手断言**（资金落点 FBO 归集 vs 卖家名下、逐法域牌照清单、到账周期都待核）——需另起一轮以**监管注册**（FinCEN MSB / FCA / MAS / 香港 HKCED MSO 名册）为源，勿用公司营销页代替。当前沿用前几轮已核查结论：连连@Amazon 是回款通道（钱第一站=连连海外账户）、@独立站是收单 PayFac，持牌体系见 `crossborder/03c-crossborder-players/lianlian.md §4.1/4.2`（连连经招股书核查的牌照表）。
+> 🔑 **跨境收款商（连连/PingPong/Airwallex/Payoneer）的"钱第一站"📌已核查**：钱**第一站不进卖家名下账户，而进收款商持牌主体/合作银行的归集账户**。最硬的一手证据是 **Airwallex 香港用户协议明文**（附A[30]）：客户资金持于"Airwallex 自己名下的底层银行账户"、**与其他用户资金混同合并（commingled and pooled）**、"**beneficially ours, not held on trust**（受益意义归 Airwallex、不为客户设信托）"，Global Account 是**虚拟账户、非客户名下银行账户**、不受存款保障。📌 Airwallex 美国则通过合作行 **Evolve Bank & Trust（FDIC）** 的 sponsor-bank 模式（附A[31]）。
+>
+> 📌 **逐法域牌照（持牌实体+监管编号，已核查；强弱见附A）**：
+> - **Payoneer**：美 FinCEN MSB #31000288349183；**爱尔兰 EMI C189473**（爱尔兰央行名册独立确认·最强）；英 FCA EMI #966835；新 MPI PS20200604；港 MSO 15-10-01734；日 KFB #00045。
+> - **Airwallex**：港 MSO 16-09-01929；美 Airwallex US LLC NMLS #1928093（约 45 州 MTL）。
+> - **连连**：LL Pay U.S. LLC，FinCEN MSB #31000268954299，NMLS #1656051，全美 50 州 MTL（另见 `crossborder/03c-crossborder-players/lianlian.md §4` 招股书核查的全球牌照表）。
+> - **PingPong**：**英 FCA EMI FRN 974154**（FCA+Companies House 双重确认·最强）；卢森堡 EMI（PingPong Europe SA，2020-10 升级）；美 NMLS #1572799。
+> - ❌ **被驳回**："PingPong 持新加坡 MAS MPI + 香港 MSO"本轮**未能一手核实**（属营销自述），不采纳。
+>
+> ⚠️ **仍未核实**：各家**到账/提现周期与费率档位**（本轮无任一家官方定价页）；Payoneer 澳洲 AFSL 号；除 Airwallex 港外各家的具体 FBO/safeguarding 账户结构。⚠️ 牌照状态随时间漂移，抓取日 2026-06-11。
+> 💡 业务角色仍是前述结论：连连@Amazon=回款通道（钱第一站=连连归集账户）、@独立站=收单 PayFac（`01 §4.6.1`）。
 
 ---
 
@@ -459,6 +469,8 @@ sequenceDiagram
 | [27] | PayPal Help + Cash App ToS + Block 10-K | Primary | PayPal/Cash App=储值余额账户(混合) |
 | [28] | Shopify — Shop Pay 页/Help | Primary | Shop Pay=保存支付信息/不持余额 |
 | [29] | Stripe — Link docs（stripe.com/payments/link）| Primary | Link=保存凭证/按卡时间线处理/不持余额 |
+| [30] | Airwallex 香港 — Treasury Management / General Terms | Primary | 资金混同合并/beneficially ours not on trust/虚拟账户(港MSO 16-09-01929) |
+| [31] | Airwallex 美国 — Terms / State Licenses + Payoneer/连连/PingPong 官方 licenses 页 + 爱尔兰央行(C189473)/FCA(974154)/Companies House | Primary/监管名册 | 各法域牌照实体名与编号 |
 | [18] | BIS Quarterly Review 2020.3 (bis.org/publ/qtrpdf/r_qt2003f) | Primary | 即时支付定义/RTGS vs DNS |
 | [19] | BIS CPMI d154《Fast payments》(bis.org/cpmi/publ/d154) | Primary | 到账≠结算解耦/DNS隐性垫资/难撤回 |
 | [20] | 美联储 FedNow (frbservices.org/financial-services/fednow + federalreserve.gov) | Primary | 美联储运营/7×24×365/即时全额/ISO 20022 |
