@@ -166,7 +166,9 @@ def extract_toc(path):
 # 按学习模块顺序排列目录（而非字母序）：根级总纲 → 模块0 → 1-3 → 4 → 5 → 6 → 参考
 DIR_ORDER = {
     "_foundation": 0,          # 模块0 地基
-    "traditional-payment": 1,  # 模块1-3 传统/卡/电子/跨境
+    "card-payment": 1,         # 模块1 银行卡
+    "epayment": 2,             # 模块2 电子支付
+    "crossborder": 3,          # 模块3 跨境支付
     "stable-coin": 4,          # 模块4 稳定币
     "agentic-payment": 5,      # 模块5 Agentic
     "_topics": 6,              # 模块6 横向专题
@@ -175,7 +177,7 @@ DIR_ORDER = {
 # 根级文档的优先顺序（总纲类排最前）
 ROOT_FILE_ORDER = {
     "INDEX.md": 0, "学习路径总纲.md": 1, "支付概念全景地图.md": 2,
-    "支付范式资金流对比.md": 3, "CLAUDE.md": 4,
+    "支付范式资金流对比.md": 3, "支付牌照术语速查.md": 4, "CLAUDE.md": 5,
 }
 
 
@@ -264,6 +266,7 @@ class H(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(b)))
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         self.end_headers()
         self.wfile.write(b)
 
@@ -299,6 +302,7 @@ class H(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         self.end_headers()
         self.wfile.write(data)
 
