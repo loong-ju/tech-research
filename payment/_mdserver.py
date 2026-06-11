@@ -48,7 +48,8 @@ body{{margin:0;font-family:-apple-system,"Microsoft YaHei UI",Arial,sans-serif;c
 .toc{{margin:2px 0 8px 14px;border-left:2px solid var(--border);padding-left:6px}}
 .toc a{{font-size:12.5px;color:var(--slate);padding:3px 8px}}
 .toc a:hover{{color:var(--accent)}}
-.toc a.h3{{padding-left:22px;font-size:12px;color:#94a3b8}}
+.toc a.h1{{font-weight:600;color:var(--ink,#1e293b)}}
+.toc a.h2{{padding-left:22px;font-size:12px;color:#94a3b8}}
 .toc a.active{{color:var(--accent);font-weight:600;background:#FFF7ED;border-radius:4px}}
 #main{{flex:1;min-width:0;padding:36px 56px;max-width:1000px;margin:0 auto}}
 #main h1{{border-bottom:2px solid var(--accent);padding-bottom:.3em;line-height:1.3}}
@@ -100,9 +101,9 @@ if(raw){{
   marked.setOptions({{breaks:false,gfm:true}});
   const tokens = marked.lexer(raw.textContent);
   document.getElementById('content').innerHTML = marked.parser(tokens);
-  // 给 h2/h3 加 id（与左侧 TOC 锚点对应）
+  // 给 h1/h2 加 id（与左侧 TOC 锚点对应，只到二级标题）
   let idx=0;
-  document.querySelectorAll('#content h2,#content h3').forEach(el=>{{el.id='sec-'+(idx++);}});
+  document.querySelectorAll('#content h1,#content h2').forEach(el=>{{el.id='sec-'+(idx++);}});
   // mermaid 渲染
   document.querySelectorAll('code.language-mermaid').forEach(el=>{{
     const d=document.createElement('div');d.className='mermaid';d.textContent=el.textContent;
@@ -112,7 +113,7 @@ if(raw){{
   document.querySelectorAll('pre code:not(.language-mermaid)').forEach(el=>{{try{{hljs.highlightElement(el)}}catch(e){{}}}});
   // 滚动高亮当前章节
   const tocLinks=[...document.querySelectorAll('.toc a')];
-  const heads=[...document.querySelectorAll('#content h2,#content h3')];
+  const heads=[...document.querySelectorAll('#content h1,#content h2')];
   if(tocLinks.length&&heads.length){{
     const obs=new IntersectionObserver(es=>{{
       es.forEach(e=>{{if(e.isIntersecting){{
@@ -136,7 +137,7 @@ def human(n):
 
 
 def extract_toc(path):
-    """从 md 提取 H2/H3 章节标题，生成二级导航。锚点 sec-0,sec-1... 与前端编号一致。"""
+    """从 md 提取 H1/H2 标题（只到二级），生成左侧导航。锚点 sec-0,sec-1... 与前端编号一致。"""
     try:
         with open(path, encoding="utf-8") as f:
             src = f.read()
@@ -151,11 +152,11 @@ def extract_toc(path):
             continue
         if in_code:
             continue
-        m = re.match(r'^(#{2,3})\s+(.*)$', ln)
+        m = re.match(r'^(#{1,2})\s+(.*)$', ln)
         if m:
             level = len(m.group(1))
             text = re.sub(r'[#*`]', '', m.group(2)).strip()
-            cls = "h3" if level == 3 else "h2"
+            cls = "h2" if level == 2 else "h1"
             items.append(f'<a class="{cls}" href="#sec-{idx}">{html.escape(text)}</a>')
             idx += 1
     if not items:
