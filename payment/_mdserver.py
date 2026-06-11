@@ -168,7 +168,7 @@ def extract_toc(path):
 DIR_ORDER = {
     "_foundation": 0,          # 模块0 地基
     "card-payment": 1,         # 模块1 银行卡
-    "epayment": 2,             # 模块2 电子支付
+    "e-payment": 2,            # 模块2 电子支付
     "crossborder": 3,          # 模块3 跨境支付
     "stable-coin": 4,          # 模块4 稳定币
     "agentic-payment": 5,      # 模块5 Agentic

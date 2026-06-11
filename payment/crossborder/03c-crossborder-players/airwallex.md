@@ -50,7 +50,7 @@
 - ⚠️ "约 80 项"逐项归属未穷举，需查 ASIC/DNB/FCA/MAS/NMLS/FINTRAC 等名录
 
 > 💰 **资金落点📌已核查（Airwallex 香港用户协议明文，强证据）**：客户资金**第一站进 Airwallex 自己名下的底层银行账户、与其他用户资金混同合并（commingled and pooled）**；协议定性"**beneficially ours, not held on trust**"（受益意义归 Airwallex、不为客户设信托、客户无利息）；**Global Account 是虚拟账户、非客户名下银行账户**、不受香港存款保障计划保护（Airwallex 非银行）。美国端经合作行 Evolve Bank & Trust 的 sponsor-bank 模式。
-> 🎯 这正面坐实了"跨境收款=钱先进收款商归集账户、非卖家名下"的资金流本质（呼应 `epayment/02b §5.4`、`01 §4.6`）。⚠️ 除港协议外各家具体 FBO/safeguarding 结构、到账周期/费率仍未核实。
+> 🎯 这正面坐实了"跨境收款=钱先进收款商归集账户、非卖家名下"的资金流本质（呼应 `e-payment/02b §5.4`、`01 §4.6`）。⚠️ 除港协议外各家具体 FBO/safeguarding 结构、到账周期/费率仍未核实。
 
 ## 5. 定位与商业模式（收入结构）📌Sacra/FXC 二手
 - **收入结构**(Sacra)：跨境支付 ≈ **60%**(服务初创/marketplace 如京东)、全球账户产品 ≈ **40%**；另口径"约 60% 收入来自 API/嵌入式产品"(与前者有重叠归类)

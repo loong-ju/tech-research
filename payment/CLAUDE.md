@@ -12,12 +12,12 @@
 | 子目录 | 维度 | 内容 |
 |---|---|---|
 | `card-payment/` | **传统支付·银行卡** | 卡组织(Visa/MC/银联)四方模型、收单产业链(收单行/Processor/ISO/PayFac)、授权清算结算、拒付、发卡、HSM/支付密码学 |
-| `epayment/` | **传统支付·电子支付** | 支付网关、第三方支付、钱包/二维码/聚合支付、电商支付业务场景(买家付/卖家收)、电子支付/收单企业画像(02c) |
+| `e-payment/` | **传统支付·电子支付** | 支付网关、第三方支付、钱包/二维码/聚合支付、电商支付业务场景(买家付/卖家收)、电子支付/收单企业画像(02c) |
 | `crossborder/` | **传统支付·跨境** | 跨境支付四套管道、代理行电汇、SWIFT、各国清算系统(Fedwire/CHIPS/CHAPS/T2/CIPS)、外汇、跨境收款全链路、跨境贸易结算方式、跨境收款企业画像(03c) |
 | `stable-coin/` | **稳定币** | USDC/USDT/PYUSD/RLUSD、链上跨境清算、稳定币合规、CBDC/mBridge 等 |
 | `agentic-payment/` | **智能体支付** | AI Agent 支付协议(Google UCP/AP2、OpenAI×Stripe ACP、Amazon、Coinbase x402、Visa TAP、Mastercard Agent Pay)、agentic commerce、欺诈风控、相关素材与演示 |
 
-> 🗂️ **跨模块通用文件放根目录**：如 `支付牌照术语速查.md`（牌照术语，被 epayment/crossborder 多处引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。模块0 地基在 `_foundation/`，横向专题(风控/合规/账务/NFR)在 `_topics/`。
+> 🗂️ **跨模块通用文件放根目录**：如 `支付牌照术语速查.md`（牌照术语，被 e-payment/crossborder 多处引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。模块0 地基在 `_foundation/`，横向专题(风控/合规/账务/NFR)在 `_topics/`。
 
 **新建研究内容时**：先判断属于哪个维度，放入对应子目录；跨维度/跨模块的综合内容放主目录根。
 
@@ -103,14 +103,14 @@ python3 _mdserver.py 8080     # 指定端口
 ### card-payment/ — 传统支付·银行卡（模块1）
 > `01-cards-business.md`（业务·四方模型/收单产业链/PayFac/推拉/电商收款）、`01-cards-tech-aws.md`（技术·ISO8583/收单系统/安全四件套+AWS）、`01c-hsm-payment-cryptography.md`（HSM/支付密码学）。
 
-### epayment/ — 传统支付·电子支付（模块2）
+### e-payment/ — 传统支付·电子支付（模块2）
 > `02-epayment-business.md`（业务·网关/第三方支付/钱包/二维码/聚合，§4.2.2 做钱包牌照vsPCI）、`02-epayment-tech-aws.md`（技术+AWS）、`02b-ecommerce-payment.md`（**电商支付业务场景**：买家付方式/卖家收方式/即时支付/Amazon Pay×Stripe，经 deep-research 核查）、`02c-epayment-players/`（电子支付/收单企业画像，含 stripe.md）。
 
 ### crossborder/ — 传统支付·跨境（模块3）
 > 以 `03-crossborder-business.md`（业务·总入口·四套管道骨架）为核心。配套：`03-crossborder-tech-aws.md`（技术·SWIFT/ISO20022/制裁筛查+AWS）、`03b-crossborder-collection-deepdive.md`（跨境收款七环节全链路+合规）、`03d-trade-settlement.md`（**跨境贸易模式与结算方式**：T/T/L-C/D-P/O-A+中国海关监管方式，经 deep-research 核查）、`03c-crossborder-players/`（企业画像，含 lianlian.md）。
 
 ### 根目录跨模块文件
-> `支付牌照术语速查.md`（MTL/EMI/MSB 等牌照速查，被 epayment/crossborder 引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。
+> `支付牌照术语速查.md`（MTL/EMI/MSB 等牌照速查，被 e-payment/crossborder 引用）、`支付范式资金流对比.md`、`支付概念全景地图.md`、`学习路径总纲.md`。
 
 ### stable-coin/ — 稳定币
 - `stablecoin_research.md` — 稳定币研究
