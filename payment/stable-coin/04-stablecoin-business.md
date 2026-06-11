@@ -155,7 +155,7 @@ flowchart TB
 - **机制/监管/对比深度参考** → `stablecoin_research.md`
 - **人民币/东南亚换汇合规** → `stablecoin_cross_border_compliance.md`
 - **六站学习链+自检** → `LEARNING_NOTES_小白到架构师.md`
-- **CBDC/mBridge（央行版共同账本）** → `crossborder/03-crossborder-business.md` §7（管道④）+ §12.2
+- **CBDC/mBridge（央行版共同账本）** → `crossborder-payment/03-crossborder-business.md` §7（管道④）+ §12.2
 - **稳定币如何成为 Agent 支付的结算资产** → 模块5
 
 ---
@@ -163,7 +163,7 @@ flowchart TB
 ## 附：常见追问（FAQ）
 
 **Q：稳定币和 CBDC 什么区别？**
-A：同思路（链上账本），不同发行人。稳定币是**私人公司**发的（Circle/Tether），是"私人借条"，你信公司；CBDC 是**央行**发的数字法币，是"钱本身"（最硬的央行货币）。货币等级上 CBDC > 商业银行货币 > 稳定币。详见 `crossborder/03-crossborder-business.md` §6/§7（管道③④对比）。
+A：同思路（链上账本），不同发行人。稳定币是**私人公司**发的（Circle/Tether），是"私人借条"，你信公司；CBDC 是**央行**发的数字法币，是"钱本身"（最硬的央行货币）。货币等级上 CBDC > 商业银行货币 > 稳定币。详见 `crossborder-payment/03-crossborder-business.md` §6/§7（管道③④对比）。
 
 **Q：稳定币"转账即结算"，那还要银行和卡组织干嘛？**
 A：因为 on/off-ramp（法币↔稳定币的入金出金口）还在传统世界——你最终要花法币、收法币，就绕不开银行账户、合规、外汇。所以现阶段稳定币是"嵌入"卡组织/银行当快管道（如 Stripe Bridge 用卡组织网络当 off-ramp），而非取代它们。链上那段快，但两端落地仍靠传统体系。

@@ -3,7 +3,7 @@
 > **学习者**：AWS 技术架构师 · 支付小白
 > **本篇目标**：系统化支付合规——KYC/KYB/AML/制裁筛查/PCI/数据驻留/牌照，散落各模块，这里收口成体系：每个合规要求"解决什么、怎么做"+ AWS 方案。
 > **前置**：模块1(PCI-DSS/KYB)、模块3(制裁筛查/外汇申报)、模块5(KYA)、6.1风控
-> **配套深度**：`crossborder/03-crossborder-business.md`(SAFE监管见附A[10])、`stablecoin_cross_border_compliance.md`(稳定币合规)、`reference/summary/`(KYB Agent案例)
+> **配套深度**：`crossborder-payment/03-crossborder-business.md`(SAFE监管见附A[10])、`stablecoin_cross_border_compliance.md`(稳定币合规)、`reference/summary/`(KYB Agent案例)
 > 标注：🔧 通用 · ☁️ AWS · 📌 关键 · 🎯 交流要点
 
 ---

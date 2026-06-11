@@ -169,7 +169,7 @@ DIR_ORDER = {
     "_foundation": 0,          # 模块0 地基
     "card-payment": 1,         # 模块1 银行卡
     "e-payment": 2,            # 模块2 电子支付
-    "crossborder": 3,          # 模块3 跨境支付
+    "crossborder-payment": 3,  # 模块3 跨境支付
     "stable-coin": 4,          # 模块4 稳定币
     "agentic-payment": 5,      # 模块5 Agentic
     "_topics": 6,              # 模块6 横向专题

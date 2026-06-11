@@ -331,7 +331,7 @@ flowchart TB
 > 📌 **逐法域牌照（持牌实体+监管编号，已核查；强弱见附A）**：
 > - **Payoneer**：美 FinCEN MSB #31000288349183；**爱尔兰 EMI C189473**（爱尔兰央行名册独立确认·最强）；英 FCA EMI #966835；新 MPI PS20200604；港 MSO 15-10-01734；日 KFB #00045。
 > - **Airwallex**：港 MSO 16-09-01929；美 Airwallex US LLC NMLS #1928093（约 45 州 MTL）。
-> - **连连**：LL Pay U.S. LLC，FinCEN MSB #31000268954299，NMLS #1656051，全美 50 州 MTL（另见 `crossborder/03c-crossborder-players/lianlian.md §4` 招股书核查的全球牌照表）。
+> - **连连**：LL Pay U.S. LLC，FinCEN MSB #31000268954299，NMLS #1656051，全美 50 州 MTL（另见 `crossborder-payment/03c-crossborder-players/lianlian.md §4` 招股书核查的全球牌照表）。
 > - **PingPong**：**英 FCA EMI FRN 974154**（FCA+Companies House 双重确认·最强）；卢森堡 EMI（PingPong Europe SA，2020-10 升级）；美 NMLS #1572799。
 > - ❌ **被驳回**："PingPong 持新加坡 MAS MPI + 香港 MSO"本轮**未能一手核实**（属营销自述），不采纳。
 >
